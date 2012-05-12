@@ -51,7 +51,6 @@ $(document).ready(function() {
 	*/
 });
 
-
 function addSongToMainList (track) {
 	var views = views = sp.require("sp://import/scripts/api/views");
 	var tpl = new models.Playlist();
@@ -180,6 +179,16 @@ function filterSongs(friendsSongs) {
 	});
 }
 
+/**
+ * Adds a song to the playlist
+ */
+function addSongToPlayList(id, songTitle) {
+	console.log("Adding " + songTitle + " to main playlist");
+	var track = getSongWithName(songTitle);
+	addSongToMainList(track);
+}
+
+
 /*
 	If we see a song from a friend we have not seen before, then add them to localStorage
 	If we get a vote then set 
@@ -190,15 +199,6 @@ function upvoteSong(friend, song) {
 }
 
 function downvoteSong(friend, song) {
-}
-
-/**
- * Adds a song to the playlist
- */
-function addSongToPlayList(id, songTitle) {
-	console.log("Adding " + songTitle + " to main playlist");
-	var track = getSongWithName(songTitle);
-	addSongToMainList(track);
 }
 
 /*
