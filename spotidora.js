@@ -23,6 +23,8 @@ $(document).ready(function() {
 	views = sp.require("sp://import/scripts/api/views");
 	
 	player = models.player;
+	player.canPlayNext = true;
+	player.canPlayPrevious = true;
 	
 	$('#goButton').click(function() {
         $('#instructions').hide();
@@ -57,7 +59,7 @@ function start() {
 	}
 }
 
-function addSongToMainList (track) {
+function addSongToMainList (track, friend) {
 	console.log("Adding " + track + " to main list.");
 	var tpl = new models.Playlist();
 	var tempList = new views.List(tpl);
@@ -172,11 +174,13 @@ function filterSongs(uid, songs) {
 			var songId = s['data']['song']['id'];
 			var songTitle = s['data']['song']['title'];
 			var time = s['start_time'];
+			var friend = s['from']['name'];
 			console.log(songId, songTitle, time);
 			if (heard.indexOf(songId) == -1) {
 				newSongs.push({
 					id: songId,
 					title: songTitle,
+					from: friend,
 					stamp: time
 				});	
 				heard[songId] = [uid];
@@ -190,7 +194,7 @@ function filterSongs(uid, songs) {
 		return (new Date(s1['stamp'])) < (new Date(s2['stamp']));
 	});
 	for (var i = 0; i < Math.min(NUM_SONGS, newSongs.length); i++) {
-		addSongToPlayList(newSongs[i]['id'], newSongs[i]['title']);
+		addSongToPlayList(newSongs[i]['id'], newSongs[i]['title'], newSongs['from']);
 	}
 	localStorage.heard = JSON.stringify(heard);
 	localStorage.seen = JSON.stringify(seen);
@@ -199,7 +203,7 @@ function filterSongs(uid, songs) {
 /**
  * Adds a song to the playlist
  */
-function addSongToPlayList(id, songTitle) {
+function addSongToPlayList(id, songTitle, friend) {
 	console.log("Adding " + songTitle + " to main playlist");
 	//var track = getSongWithName(songTitle);
 	console.log("Getting song with name " + songTitle);
@@ -209,7 +213,7 @@ function addSongToPlayList(id, songTitle) {
 	search.observe(models.EVENT.CHANGE, function() {
 		if (search.tracks[0]) {
 			console.log("Got track " + search.tracks[0] );
-			addSongToMainList(search.tracks[0]);
+			addSongToMainList(search.tracks[0], friend);
 		}
 	});
 	for (i = 0; i < 1; i++) {
