@@ -7,11 +7,10 @@ var fbAccess;
 
 exports.init = init;
 
-
 /* Playlist stuff starts */
 
-function createTestPlaylist(var searchQuery, var playlistName) {
 //https://developer.spotify.com/technologies/apps/docs/beta/833e3a06d6.html
+function createTestPlaylist(searchQuery, playlistName) {
 	var myAwesomePlaylist = new models.Playlist(playlistName);
 	var search = new models.Search(searchQuery);
 	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
