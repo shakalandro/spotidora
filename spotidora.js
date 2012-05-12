@@ -36,7 +36,8 @@ $(document).ready(function() {
 	if (!localStorage.seen) {
 		localStorage.seen = [];
 	}
-	
+	//addSongToMainList(models.Track.fromURI("spotify:track:3zpYM630ntLtWOyJu1divO"));
+	//addSongToMainList(models.Track.fromURI("spotify:track:3zpYM630ntLtWOyJu1divO"));
 	/*
 	var views = views = sp.require("sp://import/scripts/api/views");
 
@@ -52,9 +53,16 @@ $(document).ready(function() {
 
 
 function addSongToMainList (track) {
+	var views = views = sp.require("sp://import/scripts/api/views");
 	var tpl = new models.Playlist();
+	var tempList = new views.List(tpl);
 	tpl.add(track);
-	var tempList = new views.list(tpl);
+	/*
+	tpl.add(models.Track.fromURI("spotify:track:3zpYM630ntLtWOyJu1divO"));
+	tpl.add(models.Track.fromURI("spotify:track:7FmI3ygVG04KIhikMHKOKB"));
+	tpl.add(models.Track.fromURI("spotify:track:4X4ZHPOgp5DLh3tYZD5YYU"));
+	*/
+	
 	document.getElementById('trackListWrapper').appendChild(tempList.node);
 }
 
@@ -69,7 +77,7 @@ function createPlaylist(searchQuery, playlistName) {
 	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
 	search.observe(models.EVENT.CHANGE, function() {
 		search.tracks.forEach(function(track) {
-			console.log(track.name);
+			//console.log(track.name);
 			myAwesomePlaylist.add(track);
 		});
 	});
@@ -98,7 +106,8 @@ function getTrackWithData (songData) {
 }
 
 // Returns array with 5 or less songs of the given name.
-function getSongsWithName (songName) {
+function getSongWithName (songName) {
+	console.log("Getting song with name " + songName);
 	var toReturn = [];
 	var search = new models.Search(songName);
 	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
@@ -107,7 +116,7 @@ function getSongsWithName (songName) {
 			toReturn.push(track);
 		});
 	});
-	for (i = 0; i < 5; i++) {
+	for (i = 0; i < 1; i++) {
 		search.appendNext();
 	}
 	return toReturn;
@@ -142,6 +151,7 @@ function init() {
  *
  */
 function filterSongs(friendsSongs) {
+	console.log("Filtering songs!");
 	var newSongs = [];
 	$.each(friendsSongs, function(friendId, songs) {
 		$.each(songs, function(idx, s) {
@@ -185,7 +195,10 @@ function downvoteSong(friend, song) {
 /**
  * Adds a song to the playlist
  */
-function addSongToPlayList(songData) {
+function addSongToPlayList(id, songTitle) {
+	console.log("Adding " + songTitle + " to main playlist");
+	var track = getSongWithName(songTitle);
+	addSongToMainList(track);
 }
 
 /*
@@ -214,13 +227,14 @@ function updatePageWithTrackDetails() {
 
     // This will be null if nothing is playing.
     var playerTrackInfo = player.track;
-
+/*
     if (playerTrackInfo == null) {
-        header.innerText = "Nothing playing!";
+        //header.innerText = "Nothing playing!";
     } else {
         var track = playerTrackInfo.data;
-        header.innerHTML = track.name + " on the album " + track.album.name + " by " + track.album.artist.name + ".";
+        //header.innerHTML = track.name + " on the album " + track.album.name + " by " + track.album.artist.name + ".";
     }
+    */
 }
 	
 function getMusic(friends) {
