@@ -162,7 +162,6 @@ function filterSongs(uid, songs) {
 	$.each(songs, function(idx, s) {
 		if (s['application']['name'] == SPOTIFY_APP_NAME &&
 				seen.indexOf(s['id']) == -1) {
-			var from = friendId;
 			var songId = s['data']['song']['id'];
 			var songTitle = s['data']['song']['title'];
 			var time = s['start_time'];
@@ -173,9 +172,9 @@ function filterSongs(uid, songs) {
 					title: songTitle,
 					stamp: time
 				});	
-				heard[songId] = [from];
+				heard[songId] = [uid];
 			} else {
-				heard[songId].push(from);
+				heard[songId].push(uid);
 			}
 			seen.push(s['id']);
 		}
