@@ -93,7 +93,7 @@ function makeFBAjaxCall(url, success, failure) {
 }
 
 function getFriendsMusicTastes() {
-	
+	var friendId;
 }
 
 function updatePageWithTrackDetails() {
