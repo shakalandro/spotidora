@@ -60,12 +60,15 @@ function start() {
 }
 
 function addSongToMainList (track, friend) {
-	console.log("Adding " + track + " to main list.");
-	var tpl = new models.Playlist();
-	var tempList = new views.List(tpl);
-	tpl.add(track);
-	console.log($(tempList.node));
-	document.getElementById('trackListWrapper').appendChild(tempList.node);
+	if (track) {
+		console.log("Adding " + track + " to main list.");
+		var tpl = new models.Playlist();
+		var tempList = new views.List(tpl);
+		
+		tpl.add(track);
+		console.log($(tempList.node).append($('<span>' + friend + '</span>').addClass('fromFriend')));
+		document.getElementById('trackListWrapper').appendChild(tempList.node);
+	}
 }
 
 
@@ -176,7 +179,7 @@ function filterSongs(uid, songs) {
 			var songTitle = s['data']['song']['title'];
 			var time = s['start_time'];
 			var friend = s['from']['name'];
-			console.log(songId, songTitle, time);
+			console.log(songId, songTitle, time, friend);
 			if (heard.indexOf(songId) == -1) {
 				newSongs.push({
 					id: songId,
@@ -195,7 +198,7 @@ function filterSongs(uid, songs) {
 		return (new Date(s1['stamp'])) < (new Date(s2['stamp']));
 	});
 	for (var i = 0; i < Math.min(NUM_SONGS, newSongs.length); i++) {
-		addSongToPlayList(newSongs[i]['id'], newSongs[i]['title'], newSongs['from']);
+		addSongToPlayList(newSongs[i]['id'], newSongs[i]['title'], newSongs[i]['from']);
 	}
 	localStorage.heard = JSON.stringify(heard);
 	localStorage.seen = JSON.stringify(seen);
@@ -205,7 +208,7 @@ function filterSongs(uid, songs) {
  * Adds a song to the playlist
  */
 function addSongToPlayList(id, songTitle, friend) {
-	console.log("Adding " + songTitle + " to main playlist");
+	console.log("Adding " + songTitle + " to main playlist from " + friend);
 	//var track = getSongWithName(songTitle);
 	console.log("Getting song with name " + songTitle);
 	var toReturn = [];
