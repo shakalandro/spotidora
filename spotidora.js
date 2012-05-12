@@ -8,6 +8,15 @@ var fbAccess;
 exports.init = init;
 
 
+/* Playlist stuff starts */
+var playlist = models.Playlist.fromURI("spotify:user:spotify:playlist:3Yrvm5lBgnhzTYTXx2l55x");
+
+
+playlist.observe(models.EVENT.RENAME, function() {
+	console.log("Playlist renamed!");
+});
+
+/* Playlist stuff ends */
 
 auth.authenticateWithFacebook('345161178882446', ['friends_status',
 												  'friends_actions.music'], {
