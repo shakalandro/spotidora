@@ -45,6 +45,10 @@ h1 {
 	margin: 10px;
 }
 
+#goButton.small:hover {
+	background-position: 0px 100px;
+}
+
 #instructions {
 	width: 400px;
 	margin-left: auto;
