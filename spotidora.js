@@ -8,6 +8,9 @@ var fbAccess;
 var SPOTIFY_APP_NAME = 'Spotify';
 
 $(document).ready(function() {
+	//remove me!!!!!!!!!!!!!
+	localStorage.clear();
+
 	sp = getSpotifyApi(1);
 	models = sp.require('sp://import/scripts/api/models');
 	auth = sp.require('sp://import/scripts/api/auth');
@@ -51,19 +54,15 @@ $(document).ready(function() {
 	*/
 });
 
+
 function addSongToMainList (track) {
-	var views = views = sp.require("sp://import/scripts/api/views");
+	//var views = views = sp.require("sp://import/scripts/api/views");
 	var tpl = new models.Playlist();
 	var tempList = new views.List(tpl);
 	tpl.add(track);
-	/*
-	tpl.add(models.Track.fromURI("spotify:track:3zpYM630ntLtWOyJu1divO"));
-	tpl.add(models.Track.fromURI("spotify:track:7FmI3ygVG04KIhikMHKOKB"));
-	tpl.add(models.Track.fromURI("spotify:track:4X4ZHPOgp5DLh3tYZD5YYU"));
-	*/
-	
 	document.getElementById('trackListWrapper').appendChild(tempList.node);
 }
+
 
 //https://developer.spotify.com/technologies/apps/docs/beta/833e3a06d6.html
 function getPlayListWithName(playlistName) {
@@ -172,7 +171,8 @@ function filterSongs(friendsSongs) {
 				var from = friendId;
 				var songId = s['data']['song']['id'];
 				var songTitle = s['data']['song']['title'];
-				var time = s['start_time']
+				var time = s['start_time'];
+				console.log(songId, songTitle, time);
 				if (heard.indexOf(songId) == -1) {
 					newSongs.push({
 						id: songId,
@@ -188,9 +188,8 @@ function filterSongs(friendsSongs) {
 		});
 	});
 	$.each(newSongs, function(idx, obj) {
-		addSongToPlayList(obj['id'], obj['songTitle']);
+		addSongToPlayList(obj['id'], obj['title']);
 	});
-	console.log(heard);
 	localStorage.heard = JSON.stringify(heard);
 	localStorage.seen = JSON.stringify(seen);
 }
@@ -200,8 +199,8 @@ function filterSongs(friendsSongs) {
  */
 function addSongToPlayList(id, songTitle) {
 	console.log("Adding " + songTitle + " to main playlist");
-	var track = getSongWithName(songTitle);
-	addSongToMainList(track);
+	//var track = getSongWithName(songTitle);
+	//addSongToMainList(track);
 }
 
 
