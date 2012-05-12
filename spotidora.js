@@ -6,7 +6,12 @@ var player;
 var fbAccess;
 
 var SPOTIFY_APP_NAME = 'Spotify';
-var NUM_SONGS = 100;
+var NUM_SONGS = 10;
+
+var songsRemaining = 200;
+var friendsChecked = 0;
+var requestInterval;
+var friends;
 
 $(document).ready(function() {
 	//remove me!!!!!!!!!!!!!
@@ -20,7 +25,8 @@ $(document).ready(function() {
 	player = models.player;
 	
 	$('#goButton').click(function() {
-		$(this).hide();
+        $('#instructions').hide();
+		$(this).addClass('small');
 		start();
 	});
 	addSongToMainList(getSongWithName("blah"));
@@ -140,8 +146,8 @@ function go() {
 
 function getUserFriends() {
 	makeFBAjaxCall("https://graph.facebook.com/me/friends",
-		function(friends) {
-			getMusic(friends);
+		function(myfriends) {
+			getMusic(myfriends);
   	    }, function() {
 			$('body').append('friends error');
 		}
@@ -158,13 +164,11 @@ function getUserFriends() {
 
 function filterSongs(uid, songs) {
 	var newSongs = [];
-	console.log(localStorage.seen);
 	var seen = JSON.parse(localStorage.seen);
 	var heard = JSON.parse(localStorage.heard);
 	$.each(songs, function(idx, s) {
 		if (s['application']['name'] == SPOTIFY_APP_NAME &&
 				seen.indexOf(s['id']) == -1) {
-			var from = friendId;
 			var songId = s['data']['song']['id'];
 			var songTitle = s['data']['song']['title'];
 			var time = s['start_time'];
@@ -175,9 +179,9 @@ function filterSongs(uid, songs) {
 					title: songTitle,
 					stamp: time
 				});	
-				heard[songId] = [from];
+				heard[songId] = [uid];
 			} else {
-				heard[songId].push(from);
+				heard[songId].push(uid);
 			}
 			seen.push(s['id']);
 		}
@@ -185,7 +189,7 @@ function filterSongs(uid, songs) {
 	newSongs.sort(function(s1, s2) {
 		return (new Date(s1['stamp'])) < (new Date(s2['stamp']));
 	});
-	for (var i = 0; i < NUM_SONGS; i++) {
+	for (var i = 0; i < Math.min(NUM_SONGS, newSongs.length); i++) {
 		addSongToPlayList(newSongs[i]['id'], newSongs[i]['title']);
 	}
 	localStorage.heard = JSON.stringify(heard);
@@ -263,27 +267,28 @@ function updatePageWithTrackDetails() {
     */
 }
 	
-function getMusic(friends) {
-	var music = {};
-	var received = 0;
-	for (var i = 0; i < friends.length; i++) {
-		var friendId = friends[i].id;
-		
-		makeFBAjaxCall("https://graph.facebook.com/" + friendId + "/music.listens",
+function getMusic(myfriends) {
+	friends = myfriends;
+	requestInterval = setInterval(requestSongs, 500);	
+}
+
+function requestSongs() {
+	if (friends.length == 0 || songsRemaining <= 0) {
+		clearInterval(requestInterval);
+	}
+	var index = Math.floor(Math.random() * (friends.length - 10));
+	var makeRequests = friends.splice(index, 10);
+	$.each(makeRequests, function(i, l) {
+		makeFBAjaxCall("https://graph.facebook.com/" + l.id + "/music.listens",
 			function(data, paging) {
-				received++;
+				friendsChecked += makeRequests.length;
 				if (data.length != 0) {
-					music[data[0].from.id] = data;
+					songsRemaining -= data.length;
+					filterSongs(data[0].from.id, data);
 				}
-				if (received == friends.length)
-					filterSongs(music);
 			},
 			function() {
-				received++;
-				console.log("failure");
-				if (received == friends.length)
-					filterSongs(music);
-			}
-		);
-	}
+				console.log("get songs by friend failure");
+			});	
+	});
 }
