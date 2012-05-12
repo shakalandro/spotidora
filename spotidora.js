@@ -64,6 +64,7 @@ function addSongToMainList (track, friend) {
 	var tpl = new models.Playlist();
 	var tempList = new views.List(tpl);
 	tpl.add(track);
+	console.log($(tempList.node));
 	document.getElementById('trackListWrapper').appendChild(tempList.node);
 }
 
