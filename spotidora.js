@@ -10,23 +10,24 @@ exports.init = init;
 
 /* Playlist stuff starts */
 
-var myAwesomePlaylist = new models.Playlist("My Awesome Playlist");
-var searchQuery = "paranoid android -live";
-var search = new models.Search("paranoid android -live");
-search.localResults = models.LOCALSEARCHRESULTS.APPEND;
-console.log("Found " + search.tracks.length + " tracks for " + searchQuery);	
-search.observe(models.EVENT.CHANGE, function() {
-	search.tracks.forEach(function(track) {
-		console.log(track.name);
-		myAwesomePlaylist.add(track);
+function createTestPlaylist(var searchQuery, var playlistName) {
+//https://developer.spotify.com/technologies/apps/docs/beta/833e3a06d6.html
+	var myAwesomePlaylist = new models.Playlist(playlistName);
+	var search = new models.Search(searchQuery);
+	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
+	search.observe(models.EVENT.CHANGE, function() {
+		search.tracks.forEach(function(track) {
+			console.log(track.name);
+			myAwesomePlaylist.add(track);
+		});
 	});
-});
-search.appendNext();
-// Currently playing. 
-//myAwesomePlaylist.add(models.player.track);
-myAwesomePlaylist.observe(models.EVENT.RENAME, function() {
-	console.log("Playlist renamed!");
-});
+	search.appendNext();
+	// Currently playing. 
+	//myAwesomePlaylist.add(models.player.track);
+	myAwesomePlaylist.observe(models.EVENT.RENAME, function() {
+		console.log("Playlist renamed!");
+	});
+}
 
 /* Playlist stuff ends */
 
