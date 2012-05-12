@@ -57,11 +57,15 @@ function start() {
 	}
 }
 
-function addSongToMainList (track) {
+function addSongToMainList(track, name) {
 	console.log("Adding " + track + " to main list.");
 	var tpl = new models.Playlist();
 	var tempList = new views.List(tpl);
 	tpl.add(track);
+	console.log(tempList.node);
+	var span = $("span");
+	span.text()
+	console.log($(tempList.node).find("div a")); //.append($("span").text(name)));
 	document.getElementById('trackListWrapper').appendChild(tempList.node);
 }
 
