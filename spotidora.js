@@ -245,7 +245,7 @@ function updatePageWithTrackDetails() {
 	
 function getMusic(myfriends) {
 	friends = myfriends;
-	requestInterval = setInterval(requestSongs, 100);	
+	requestInterval = setInterval(requestSongs, 500);	
 }
 
 function requestSongs() {
@@ -259,12 +259,8 @@ function requestSongs() {
 			function(data, paging) {
 				friendsChecked += makeRequests.length;
 				if (data.length != 0) {
-					var music = [];
-					console.log(data);
-					music[data[0].from.id] = data;
 					songsRemaining -= data.length;
-					console.log(songsRemaining);
-					filterSongs(music);
+					filterSongs(data[0].from.id, data);
 				}
 			},
 			function() {
