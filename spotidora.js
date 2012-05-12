@@ -77,8 +77,9 @@ function pullFacebookDataTest() {
 		data: {access_token: fbAccess},
 		dataType: "json"
     }).done(function(data) {
-	    $.each(data, function(idx, person) {
-	    	console.log(person);
+    	console.log(data);
+	    $.each(data['data'], function(idx, person) {
+	    	console.log(person['id']);
 	    });
     }).fail(function(xhr, status) {
     	$('body').append(status);
