@@ -25,7 +25,7 @@ $(document).ready(function() {
 	
 		onComplete : function() { }
 	});
-	
+	/*
 	var views = sp.require("sp://import/scripts/api/views");
 
 	var tpl = new models.Playlist();
@@ -35,6 +35,7 @@ $(document).ready(function() {
 	tpl.add(models.Track.fromURI("spotify:track:4X4ZHPOgp5DLh3tYZD5YYU"));
 	
 	document.getElementById('trackListWrapper').appendChild(tempList.node);
+	*/
 });
 
 
