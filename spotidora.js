@@ -6,7 +6,7 @@ var player;
 var fbAccess;
 
 var SPOTIFY_APP_NAME = 'Spotify';
-var NUM_SONGS = 100;
+var NUM_SONGS = 10;
 
 var songsRemaining = 200;
 var friendsChecked = 0;
@@ -182,7 +182,7 @@ function filterSongs(uid, songs) {
 	newSongs.sort(function(s1, s2) {
 		return (new Date(s1['stamp'])) < (new Date(s2['stamp']));
 	});
-	for (var i = 0; i < NUM_SONGS; i++) {
+	for (var i = 0; i < Math.min(NUM_SONGS, newSongs.length); i++) {
 		addSongToPlayList(newSongs[i]['id'], newSongs[i]['title']);
 	}
 	localStorage.heard = JSON.stringify(heard);
