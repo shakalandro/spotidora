@@ -7,6 +7,11 @@ var fbAccess;
 
 var SPOTIFY_APP_NAME = 'Spotify';
 
+var songsRemaining = 200;
+var friendsChecked = 0;
+var requestInterval;
+var friends;
+
 $(document).ready(function() {
 	sp = getSpotifyApi(1);
 	models = sp.require('sp://import/scripts/api/models');
@@ -136,8 +141,8 @@ function init() {
 
 function getUserFriends() {
 	makeFBAjaxCall("https://graph.facebook.com/me/friends",
-		function(friends) {
-			getMusic(friends);
+		function(myfriends) {
+			getMusic(myfriends);
   	    }, function() {
 			$('body').append('friends error');
 		}
@@ -153,7 +158,6 @@ function getUserFriends() {
  */
 function filterSongs(friendsSongs) {
 	var newSongs = [];
-	console.log(localStorage.seen);
 	var seen = JSON.parse(localStorage.seen);
 	var heard = JSON.parse(localStorage.heard);
 	$.each(friendsSongs, function(friendId, songs) {
@@ -239,27 +243,32 @@ function updatePageWithTrackDetails() {
     }
 }
 	
-function getMusic(friends) {
-	var music = {};
-	var received = 0;
-	for (var i = 0; i < friends.length; i++) {
-		var friendId = friends[i].id;
-		
-		makeFBAjaxCall("https://graph.facebook.com/" + friendId + "/music.listens",
+function getMusic(myfriends) {
+	friends = myfriends;
+	requestInterval = setInterval(requestSongs, 100);	
+}
+
+function requestSongs() {
+	if (friends.length == 0 || songsRemaining <= 0) {
+		clearInterval(requestInterval);
+	}
+	var index = Math.floor(Math.random() * (friends.length - 10));
+	var makeRequests = friends.splice(index, 10);
+	$.each(makeRequests, function(i, l) {
+		makeFBAjaxCall("https://graph.facebook.com/" + l.id + "/music.listens",
 			function(data, paging) {
-				received++;
+				friendsChecked += makeRequests.length;
 				if (data.length != 0) {
+					var music = [];
+					console.log(data);
 					music[data[0].from.id] = data;
-				}
-				if (received == friends.length)
+					songsRemaining -= data.length;
+					console.log(songsRemaining);
 					filterSongs(music);
+				}
 			},
 			function() {
-				received++;
-				console.log("failure");
-				if (received == friends.length)
-					filterSongs(music);
-			}
-		);
-	}
+				console.log("get songs by friend failure");
+			});	
+	});
 }
