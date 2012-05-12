@@ -25,6 +25,7 @@ $(document).ready(function() {
 	
 		onComplete : function() { }
 	});
+	testLocalStorage();
 	/*
 	var views = sp.require("sp://import/scripts/api/views");
 
@@ -58,6 +59,15 @@ function createPlaylist(searchQuery, playlistName) {
 	});
 }
 
+
+function testLocalStorage () {
+    if (localStorage)  {
+        console.log("Local storage supported");  
+    } else  {
+        console.log("Local storage unsupported");
+    }
+}
+
 function init() {
 	console.log("Spotidora App Starting");
     updatePageWithTrackDetails();
@@ -76,7 +86,6 @@ function pullFacebookDataTest() {
 		function(data) {
 			$.each(data, function(idx, person) {
 				console.log(person['id']);
-				makeFB
 			});
 	    }, function() {
 			$('body').append('friends error');
