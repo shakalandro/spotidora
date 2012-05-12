@@ -74,7 +74,8 @@ function init() {
 function pullFacebookDataTest() {
     $.ajax({
         url: "https://graph.facebook.com/me/friends",
-		data: {access_token: fbAccess}
+		data: {access_token: fbAccess},
+		dataType: "json"
     }).done(function(data) {
 	    console.log(data);
     }).fail(function(xhr, status) {
