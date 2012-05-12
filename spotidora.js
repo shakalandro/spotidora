@@ -29,10 +29,10 @@ $(document).ready(function() {
 	});
 	
 	if (!localStorage.heard) {
-		localStorage.heard = [];
+		localStorage.heard = JSON.stringify([]);
 	}
 	if (!localStorage.seen) {
-		localStorage.seen = [];
+		localStorage.seen = JSON.stringify([]);
 	}
 	
 	/*
@@ -100,31 +100,36 @@ function getUserFriends() {
  */
 function filterSongs(friendsSongs) {
 	var newSongs = [];
+	var heard = JSON.parse(localStorage.heard);
+	var seen = JSON.parse(localStorage.seen);
 	$.each(friendsSongs, function(friendId, songs) {
 		$.each(songs, function(idx, s) {
 			if (s['application']['name'] == SPOTIFY_APP_NAME &&
-					localStorage.seen.indexOf(s['id']) == -1) {
+					seen.indexOf(s['id']) == -1) {
 				var from = friendId;
 				var songId = s['data']['song']['id'];
 				var songTitle = s['data']['song']['title'];
 				var time = s['start_time']
-				if (localStorage.heard.indexOf(songId) == -1) {
+				if (heard.indexOf(songId) == -1) {
 					newSongs.push({
 						id: songId,
 						title: songTitle,
 						stamp: time
 					});
-					localStorage.heard[songId] = [from];
+					heard[songId] = [from];
 				} else {
-					localStorage.heard[songId].push(from);
+					heard[songId].push(from);
 				}
-				localStorage.seen.push(s['id']);
+				seen.push(s['id']);
 			}
 		});
 	});
 	$.each(newSongs, function(idx, obj) {
 		addSongToPlayList(obj['id'], obj['songTitle']);
 	});
+	console.log(heard);
+	localStorage.heard = heard;
+	localStorage.seen = seen;
 }
 
 /*
