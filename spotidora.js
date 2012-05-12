@@ -1,10 +1,27 @@
 var sp = getSpotifyApi(1);
 var models = sp.require('sp://import/scripts/api/models');
+var auth = sp.require('sp://import/scripts/api/auth');
+
 var player = models.player;
+var fbAccess;
 
 exports.init = init;
 
-require("auth");
+
+
+auth.authenticateWithFacebook('345161178882446', ['friends_status',
+												  'friends_actions.music'], {
+	onSuccess : function(accessToken, ttl) {
+		console.log("Success! Here's the access token: " + accessToken);
+		fbAccess = accessToken;
+	},
+
+	onFailure : function(error) {
+		console.log("Authentication failed with error: " + error);
+	},
+
+	onComplete : function() { }
+});
 
 function init() {
 	console.log("Spotidora App Starting");

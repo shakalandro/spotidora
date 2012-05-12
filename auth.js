@@ -1,8 +1,7 @@
-var auth = p.require('sp://import/scripts/api/auth');
+var auth = sp.require('sp://import/scripts/api/auth');
 
 auth.authenticateWithFacebook('345161178882446', ['friends_status',
-												  'friends_actions.music'
-												  'user_actions.music'], {
+												  'friends_actions.music'], {
 	onSuccess : function(accessToken, ttl) {
 		console.log("Success! Here's the access token: " + accessToken);
 	},
