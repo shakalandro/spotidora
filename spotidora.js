@@ -77,10 +77,16 @@ function pullFacebookDataTest() {
 		data: {access_token: fbAccess},
 		dataType: "json"
     }).done(function(data) {
-	    console.log(data);
+	    $.each(data, function(idx, person) {
+	    	console.log(person);
+	    });
     }).fail(function(xhr, status) {
     	$('body').append(status);
     });
+}
+
+function makeFBAjaxCall(url) {
+	
 }
 
 function updatePageWithTrackDetails() {
