@@ -4,6 +4,8 @@ var auth;
 var player;
 var fbAccess;
 
+var SPOTIFY_APP_NAME = 'Spotify';
+
 $(document).ready(function() {
 	sp = getSpotifyApi(1);
 	models = sp.require('sp://import/scripts/api/models');
@@ -25,6 +27,14 @@ $(document).ready(function() {
 	
 		onComplete : function() { }
 	});
+	
+	if (!localStorage.heard) {
+		localStorage.heard = [];
+	}
+	if (!localStorage.seen) {
+		localStorage.seen = [];
+	}
+	
 	/*
 	var views = sp.require("sp://import/scripts/api/views");
 
@@ -84,9 +94,50 @@ function getUserFriends() {
 /*
  * takes an associative array friendsSongs[friend][song]
  * and filters songs that are added to the playlist
+ *
+ * Currently filters out old fb post and duplicate songs.
+ *
  */
 function filterSongs(friendsSongs) {
+	var newSongs = [];
+	$.each(friendsSongs, function(friendId, songs) {
+		$.each(songs, function(idx, s) {
+			if (s['application']['name'] == SPOTIFY_APP_NAME &&
+					localStorage.seen.indexOf(s['id']) == -1) {
+				var from = friendId;
+				var songId = s['data']['song']['id'];
+				var songTitle = s['data']['song']['title'];
+				var time = s['start_time']
+				if (localStorage.heard.indexOf(songId) == -1) {
+					newSongs.push({
+						id: songId,
+						title: songTitle,
+						stamp: time
+					});
+					localStorage.heard[songId] = [from];
+				} else {
+					localStorage.heard[songId].push(from);
+				}
+				localStorage.seen.push(s['id']);
+			}
+		});
+	});
+	$.each(newSongs, function(idx, obj) {
+		addSongToPlayList(obj['id'], obj['songTitle']);
+	});
+}
 
+/*
+	If we see a song from a friend we have not seen before, then add them to localStorage
+	If we get a vote then set 
+*/
+
+function upvoteSong(friend, song) {
+	localStorage.friend
+}
+
+function downvoteSong(friend, song) {
+	
 }
 
 /**
