@@ -1,12 +1,12 @@
 {
     "BundleType": "Application",
-    "BundleIdentifier": "Test",
+    "BundleIdentifier": "Spotidora",
     "BundleVersion": "1.0",
     "AppIcon": {
         "36x18": "tutorial.png"
     },
     "AppName": {
-        "en": "TestApplication"
+        "en": "Spotidora"
     },
     "SupportedLanguages": [
         "en"
