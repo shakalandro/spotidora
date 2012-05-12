@@ -8,6 +8,9 @@ var fbAccess;
 var SPOTIFY_APP_NAME = 'Spotify';
 
 $(document).ready(function() {
+	//remove me!!!!!!!!!!!!!
+	localStorage.clear();
+
 	sp = getSpotifyApi(1);
 	models = sp.require('sp://import/scripts/api/models');
 	auth = sp.require('sp://import/scripts/api/auth');
@@ -163,7 +166,8 @@ function filterSongs(friendsSongs) {
 				var from = friendId;
 				var songId = s['data']['song']['id'];
 				var songTitle = s['data']['song']['title'];
-				var time = s['start_time']
+				var time = s['start_time'];
+				console.log(songId, songTitle, time);
 				if (heard.indexOf(songId) == -1) {
 					newSongs.push({
 						id: songId,
@@ -179,9 +183,8 @@ function filterSongs(friendsSongs) {
 		});
 	});
 	$.each(newSongs, function(idx, obj) {
-		addSongToPlayList(obj['id'], obj['songTitle']);
+		addSongToPlayList(obj['id'], obj['title']);
 	});
-	console.log(heard);
 	localStorage.heard = JSON.stringify(heard);
 	localStorage.seen = JSON.stringify(seen);
 }
@@ -201,7 +204,8 @@ function downvoteSong(friend, song) {
 /**
  * Adds a song to the playlist
  */
-function addSongToPlayList(songData) {
+function addSongToPlayList(songId, songTitle) {
+
 }
 
 /*
