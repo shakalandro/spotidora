@@ -76,7 +76,7 @@ function pullFacebookDataTest() {
 		function(data) {
 			$.each(data, function(idx, person) {
 				console.log(person['id']);
-			}
+			});
 	    }, function() {
 			$('body').append('friends error');
 		}
