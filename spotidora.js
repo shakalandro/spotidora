@@ -134,6 +134,16 @@ function init() {
     });
 }
 
+function getUserFriends() {
+	makeFBAjaxCall("https://graph.facebook.com/me/friends",
+		function(friends) {
+			getMusic(friends);
+  	    }, function() {
+			$('body').append('friends error');
+		}
+	);	
+}
+
 /*
  * takes an associative array friendsSongs[friend][song]
  * and filters songs that are added to the playlist
