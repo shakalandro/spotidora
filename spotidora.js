@@ -11,14 +11,17 @@ exports.init = init;
 /* Playlist stuff starts */
 
 var myAwesomePlaylist = new models.Playlist("My Awesome Playlist");
-var daftPunkSearch = new models.Search("Daft Punk");
-daftPunkSearch.localResults = models.LOCALSEARCHRESULTS.APPEND;
-
-daftPunkSearch.tracks.forEach(function(track) {
-	//myAwesomePlaylist.add(track.name);
-	console.log(track.name);
+var searchQuery = "paranoid android -live";
+var search = new models.Search("paranoid android -live");
+search.localResults = models.LOCALSEARCHRESULTS.APPEND;
+console.log("Found " + search.tracks.length + " tracks for " + searchQuery);	
+search.observe(models.EVENT.CHANGE, function() {
+	search.tracks.forEach(function(track) {
+		console.log(track.name);
+		myAwesomePlaylist.add(track);
+	});
 });
-
+search.appendNext();
 // Currently playing. 
 //myAwesomePlaylist.add(models.player.track);
 myAwesomePlaylist.observe(models.EVENT.RENAME, function() {
