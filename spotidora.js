@@ -4,6 +4,8 @@ var player = models.player;
 
 exports.init = init;
 
+require("auth");
+
 function init() {
 	console.log("Spotidora App Starting");
     updatePageWithTrackDetails();
