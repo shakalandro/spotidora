@@ -62,7 +62,7 @@ function init() {
 
 function pullFacebookDataTest() {
     $.ajax({
-        url: "http://graph.facebook.com/me/friends",
+        url: "https://graph.facebook.com/me/friends",
 		data: {access_token: fbAccess}
     }).done(function(data) {
 	    $('body').append(data);
