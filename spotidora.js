@@ -77,7 +77,8 @@ function pullFacebookDataTest() {
 		function(data) {
 			$.each(data, function(idx, person) {
 				console.log(person['id']);
-	    }, function() {
+			});
+		}, function() {
 			$('body').append('friends error');
 		}
 	);
@@ -109,15 +110,11 @@ function updatePageWithTrackDetails() {
 	
 function getListens() {
 	console.log("sending music request");
-	$.get({
-		url: "https://graph.facebook.com/roy.miv/music.listens",
-		data: {access_token: fbAccess},
-		dataType: "json",
-		success: function(response) {
-			console.log("music: " + resonse);
-		},
-		error: function(data) {
-			console.log("music request error");
-		}
+	makeFBAjaxCall("https://graph.facebook.com/roy.miv/music.listens",
+	function(data, paging) {
+		console.log(data);
+	},
+	function() {
+		console.log("failure");
 	});
 }
