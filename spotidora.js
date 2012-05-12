@@ -72,22 +72,24 @@ function init() {
 }
 
 function pullFacebookDataTest() {
-    $.ajax({
-        url: "https://graph.facebook.com/me/friends",
+	makeFBAjaxCall("https://graph.facebook.com/me/friends",
+		function(data) {
+			$.each(data, function(idx, person) {
+				console.log(person['id']);
+	    }, function() {
+			$('body').append('friends error');
+		}
+	);
+}
+
+function makeFBAjaxCall(url, success, failure) {
+	$.ajax({
+        url: url,
 		data: {access_token: fbAccess},
 		dataType: "json"
     }).done(function(data) {
-    	console.log(data);
-	    $.each(data['data'], function(idx, person) {
-	    	console.log(person['id']);
-	    });
-    }).fail(function(xhr, status) {
-    	$('body').append(status);
-    });
-}
-
-function makeFBAjaxCall(url) {
-	
+    	success(data['data'], data['paging']);
+    }).fail(failure);
 }
 
 function updatePageWithTrackDetails() {
