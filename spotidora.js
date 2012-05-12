@@ -1,11 +1,33 @@
-var sp = getSpotifyApi(1);
-var models = sp.require('sp://import/scripts/api/models');
-var player = models.player;
+var sp;
+var models;
+var auth;
 
-exports.init = init;
+var player;
+var fbAccess;
 
-require("auth");
-require("https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js");
+$(document).ready(function() {
+	sp = getSpotifyApi(1);
+	models = sp.require('sp://import/scripts/api/models');
+	auth = sp.require('sp://import/scripts/api/auth');
+	
+	player = models.player;
+	
+	auth.authenticateWithFacebook('345161178882446', ['friends_status',
+												  'friends_actions.music'], {
+		onSuccess : function(accessToken, ttl) {
+			console.log("Success! Here's the access token: " + accessToken);
+			fbAccess = accessToken;
+			init();
+		},
+	
+		onFailure : function(error) {
+			console.log("Authentication failed with error: " + error);
+		},
+	
+		onComplete : function() { }
+	});
+
+});
 
 function init() {
 	console.log("Spotidora App Starting");
@@ -24,9 +46,11 @@ function init() {
 function pullFacebookDataTest() {
     $.ajax({
         url: "http://graph.facebook.com/me/friends",
-	data: {access_token: fbAccess}
+		data: {access_token: fbAccess}
     }).done(function(data) {
 	    $('body').append(data);
+    }).fail(function(xhr, status) {
+    	$('body').append(status);
     });
 }
 
