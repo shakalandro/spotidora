@@ -209,7 +209,7 @@ function addSongToPlayList(id, songTitle) {
 	search.observe(models.EVENT.CHANGE, function() {
 		if (search.tracks[0]) {
 			console.log("Got track " + search.tracks[0] );
-			addSongToMainList(track);
+			addSongToMainList(search.tracks[0]);
 		}
 	});
 	for (i = 0; i < 1; i++) {
