@@ -76,12 +76,21 @@ function pullFacebookDataTest() {
 		function(data) {
 			$.each(data, function(idx, person) {
 				console.log(person['id']);
+				makeFB
+			});
 	    }, function() {
 			$('body').append('friends error');
 		}
 	);
 }
 
+/*
+	Makes an fb call on url. When it completes it will call one of the handlers,
+	which should have the following signatures.
+	
+	void success(data, paging_info);
+	void failure(xhr, status);
+*/
 function makeFBAjaxCall(url, success, failure) {
 	$.ajax({
         url: url,
