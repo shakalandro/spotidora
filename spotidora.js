@@ -1,7 +1,6 @@
 var sp;
 var models;
 var auth;
-
 var player;
 var fbAccess;
 
@@ -26,8 +25,27 @@ $(document).ready(function() {
 	
 		onComplete : function() { }
 	});
-
 });
+
+
+//https://developer.spotify.com/technologies/apps/docs/beta/833e3a06d6.html
+function createTestPlaylist(searchQuery, playlistName) {
+	var myAwesomePlaylist = new models.Playlist(playlistName);
+	var search = new models.Search(searchQuery);
+	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
+	search.observe(models.EVENT.CHANGE, function() {
+		search.tracks.forEach(function(track) {
+			console.log(track.name);
+			myAwesomePlaylist.add(track);
+		});
+	});
+	search.appendNext();
+	// Currently playing. 
+	//myAwesomePlaylist.add(models.player.track);
+	myAwesomePlaylist.observe(models.EVENT.RENAME, function() {
+		console.log("Playlist renamed!");
+	});
+}
 
 function init() {
 	console.log("Spotidora App Starting");
