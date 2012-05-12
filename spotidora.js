@@ -178,13 +178,27 @@ function updatePageWithTrackDetails() {
     }
 }
 	
-function getListens() {
-	console.log("sending music request");
-	makeFBAjaxCall("https://graph.facebook.com/roy.miv/music.listens",
-	function(data, paging) {
-		console.log(data);
-	},
-	function() {
-		console.log("failure");
-	});
+function getMusic(friends) {
+	var music = {};
+	var received = 0;
+	for (var i = 0; i < friends.length; i++) {
+		var friendId = friends[i].id;
+		
+		makeFBAjaxCall("https://graph.facebook.com/" + friendId + "/music.listens",
+			function(data, paging) {
+				received++;
+				if (data.length != 0) {
+					music[data[0].from.id] = data;
+				}
+				if (received == friends.length)
+					filterSongs(music);
+			},
+			function() {
+				received++;
+				console.log("failure");
+				if (received == friends.length)
+					filterSongs(music);
+			}
+		);
+	}
 }
