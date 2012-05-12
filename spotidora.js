@@ -66,11 +66,13 @@ function pullFacebookDataTest() {
         url: "https://graph.facebook.com/me/friends",
 		data: {access_token: fbAccess}
     }).done(function(data) {
-	    $('body').append(data);
+	    $('body').append($('p').text(data));
     }).fail(function(xhr, status) {
     	$('body').append(status);
     });
 }
+
+
 
 function updatePageWithTrackDetails() {
     var header = document.getElementById("header");
