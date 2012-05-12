@@ -61,8 +61,7 @@ function createPlaylist(searchQuery, playlistName) {
 function init() {
 	console.log("Spotidora App Starting");
     updatePageWithTrackDetails();
-    pullFacebookDataTest();
-	getListens();
+    getUserFriends();
 
     player.observe(models.EVENT.CHANGE, function (e) {
         // Only update the page if the track changed
@@ -72,16 +71,29 @@ function init() {
     });
 }
 
-function pullFacebookDataTest() {
+function getUserFriends() {
 	makeFBAjaxCall("https://graph.facebook.com/me/friends",
-		function(data) {
-			$.each(data, function(idx, person) {
-				console.log(person['id']);
-			});
+		function(friends) {
+			getMusic(friends);
 	    }, function() {
 			$('body').append('friends error');
 		}
 	);
+}
+
+/*
+ * takes an associative array friendsSongs[friend][song]
+ * and filters songs that are added to the playlist
+ */
+function filterSongs(friendsSongs) {
+
+}
+
+/**
+ * Adds a song to the playlist
+ */
+function addSongToPlayList(songData) {
+
 }
 
 /*
