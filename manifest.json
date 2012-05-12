@@ -3,7 +3,7 @@
     "BundleIdentifier": "spotidora",
     "BundleVersion": "1.0",
     "AppIcon": {
-        "36x18": "tutorial.png"
+        "36x18": "icon.png"
     },
     "AppName": {
         "en": "Spotidora"
