@@ -9,10 +9,19 @@ exports.init = init;
 
 
 /* Playlist stuff starts */
-var playlist = models.Playlist.fromURI("spotify:user:spotify:playlist:3Yrvm5lBgnhzTYTXx2l55x");
 
+var myAwesomePlaylist = new models.Playlist("My Awesome Playlist");
+var daftPunkSearch = new models.Search("Daft Punk");
+daftPunkSearch.localResults = models.LOCALSEARCHRESULTS.APPEND;
 
-playlist.observe(models.EVENT.RENAME, function() {
+daftPunkSearch.tracks.forEach(function(track) {
+	//myAwesomePlaylist.add(track.name);
+	console.log(track.name);
+});
+
+// Currently playing. 
+//myAwesomePlaylist.add(models.player.track);
+myAwesomePlaylist.observe(models.EVENT.RENAME, function() {
 	console.log("Playlist renamed!");
 });
 
