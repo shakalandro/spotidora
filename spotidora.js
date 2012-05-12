@@ -18,12 +18,19 @@ $(document).ready(function() {
 	
 	player = models.player;
 	
+	$('#goButton').click(function() {
+		$(this).hide();
+		start();
+	});
+});
+
+function start() {
 	auth.authenticateWithFacebook('345161178882446', ['friends_status',
 												  'friends_actions.music'], {
 		onSuccess : function(accessToken, ttl) {
 			console.log("Success! Here's the access token: " + accessToken);
 			fbAccess = accessToken;
-			init();
+			getUserFriends();
 		},
 	
 		onFailure : function(error) {
@@ -39,24 +46,9 @@ $(document).ready(function() {
 	if (!localStorage.seen) {
 		localStorage.seen = JSON.stringify([]);
 	}
-	//addSongToMainList(models.Track.fromURI("spotify:track:3zpYM630ntLtWOyJu1divO"));
-	//addSongToMainList(models.Track.fromURI("spotify:track:3zpYM630ntLtWOyJu1divO"));
-	/*
-	var views = views = sp.require("sp://import/scripts/api/views");
-
-	var tpl = new models.Playlist();
-	var tempList = new views.List(tpl);
-	tpl.add(models.Track.fromURI("spotify:track:3zpYM630ntLtWOyJu1divO"));
-	tpl.add(models.Track.fromURI("spotify:track:7FmI3ygVG04KIhikMHKOKB"));
-	tpl.add(models.Track.fromURI("spotify:track:4X4ZHPOgp5DLh3tYZD5YYU"));
-	
-	document.getElementById('trackListWrapper').appendChild(tempList.node);
-	*/
-});
-
+}
 
 function addSongToMainList (track) {
-	//var views = views = sp.require("sp://import/scripts/api/views");
 	var tpl = new models.Playlist();
 	var tempList = new views.List(tpl);
 	tpl.add(track);
@@ -106,6 +98,7 @@ function getTrackWithData (songData) {
 // Returns array with 5 or less songs of the given name.
 function getSongWithName (songName) {
 	console.log("Getting song with name " + songName);
+	/*
 	var toReturn = [];
 	var search = new models.Search(songName);
 	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
@@ -117,7 +110,8 @@ function getSongWithName (songName) {
 	for (i = 0; i < 1; i++) {
 		search.appendNext();
 	}
-	return toReturn;
+	*/
+	//return toReturn;
 }
 
 function testLocalStorage () {
@@ -128,7 +122,7 @@ function testLocalStorage () {
     }
 }
 
-function init() {
+function go() {
 	console.log("Spotidora App Starting");
     updatePageWithTrackDetails();
     getUserFriends();
@@ -178,7 +172,7 @@ function filterSongs(friendsSongs) {
 						id: songId,
 						title: songTitle,
 						stamp: time
-					});
+					});	
 					heard[songId] = [from];
 				} else {
 					heard[songId].push(from);
@@ -199,7 +193,7 @@ function filterSongs(friendsSongs) {
  */
 function addSongToPlayList(id, songTitle) {
 	console.log("Adding " + songTitle + " to main playlist");
-	//var track = getSongWithName(songTitle);
+	var track = getSongWithName(songTitle);
 	//addSongToMainList(track);
 }
 
@@ -224,6 +218,7 @@ function downvoteSong(friend, song) {
 	void failure(xhr, status);
 */
 function makeFBAjaxCall(url, success, failure) {
+	console.log("Making Ajax call to " + url);
 	$.ajax({
         url: url,
 		data: {access_token: fbAccess},
