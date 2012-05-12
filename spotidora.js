@@ -25,7 +25,7 @@ $(document).ready(function() {
 	
 		onComplete : function() { }
 	});
-	
+	/*
 	var views = sp.require("sp://import/scripts/api/views");
 
 	var tpl = new models.Playlist();
@@ -35,6 +35,7 @@ $(document).ready(function() {
 	tpl.add(models.Track.fromURI("spotify:track:4X4ZHPOgp5DLh3tYZD5YYU"));
 	
 	document.getElementById('trackListWrapper').appendChild(tempList.node);
+	*/
 });
 
 
@@ -64,7 +65,6 @@ function init() {
 	getListens();
 
     player.observe(models.EVENT.CHANGE, function (e) {
-
         // Only update the page if the track changed
         if (e.data.curtrack == true) {
             updatePageWithTrackDetails();
@@ -73,21 +73,24 @@ function init() {
 }
 
 function pullFacebookDataTest() {
-    $.ajax({
-        url: "https://graph.facebook.com/me/friends",
+	makeFBAjaxCall("https://graph.facebook.com/me/friends",
+		function(data) {
+			$.each(data, function(idx, person) {
+				console.log(person['id']);
+	    }, function() {
+			$('body').append('friends error');
+		}
+	);
+}
+
+function makeFBAjaxCall(url, success, failure) {
+	$.ajax({
+        url: url,
 		data: {access_token: fbAccess},
 		dataType: "json"
     }).done(function(data) {
-	    $.each(data, function(idx, person) {
-	    	console.log(person);
-	    });
-    }).fail(function(xhr, status) {
-    	$('body').append(status);
-    });
-}
-
-function makeFBAjaxCall(url) {
-	
+    	success(data['data'], data['paging']);
+    }).fail(failure);
 }
 
 function updatePageWithTrackDetails() {
