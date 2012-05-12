@@ -53,7 +53,6 @@ function init() {
     pullFacebookDataTest();
 
     player.observe(models.EVENT.CHANGE, function (e) {
-
         // Only update the page if the track changed
         if (e.data.curtrack == true) {
             updatePageWithTrackDetails();
