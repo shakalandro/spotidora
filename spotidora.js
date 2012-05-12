@@ -59,6 +59,37 @@ function createPlaylist(searchQuery, playlistName) {
 	});
 }
 
+// Returns top song with the given data.
+function getTrackWithData (songData) {
+	var toReturn;
+	var search = new models.Search(songName);
+	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
+	search.observe(models.EVENT.CHANGE, function() {
+		search.tracks.forEach(function(track) {
+			toReturn = track;
+		});
+	});
+	for (i = 0; i < 1; i++) {
+		search.appendNext();
+	}
+	return toReturn;	
+}
+
+// Returns array with 5 or less songs of the given name.
+function getSongsWithName (songName) {
+	var toReturn = [];
+	var search = new models.Search(songName);
+	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
+	search.observe(models.EVENT.CHANGE, function() {
+		search.tracks.forEach(function(track) {
+			toReturn.push(track);
+		});
+	});
+	for (i = 0; i < 5; i++) {
+		search.appendNext();
+	}
+	return toReturn;
+}
 
 function testLocalStorage () {
     if (localStorage)  {
@@ -71,7 +102,7 @@ function testLocalStorage () {
 function init() {
 	console.log("Spotidora App Starting");
     updatePageWithTrackDetails();
-    pullFacebookDataTest();
+    getUserFriends();
 
     player.observe(models.EVENT.CHANGE, function (e) {
         // Only update the page if the track changed
@@ -81,16 +112,17 @@ function init() {
     });
 }
 
-function pullFacebookDataTest() {
-	makeFBAjaxCall("https://graph.facebook.com/me/friends",
-		function(data) {
-			$.each(data, function(idx, person) {
-				console.log(person['id']);
-			});
-	    }, function() {
-			$('body').append('friends error');
-		}
-	);
+/*
+ * takes an associative array friendsSongs[friend][song]
+ * and filters songs that are added to the playlist
+ */
+function filterSongs(friendsSongs) {
+}
+
+/**
+ * Adds a song to the playlist
+ */
+function addSongToPlayList(songData) {
 }
 
 /*
@@ -126,4 +158,15 @@ function updatePageWithTrackDetails() {
         var track = playerTrackInfo.data;
         header.innerHTML = track.name + " on the album " + track.album.name + " by " + track.album.artist.name + ".";
     }
+}
+	
+function getListens() {
+	console.log("sending music request");
+	makeFBAjaxCall("https://graph.facebook.com/roy.miv/music.listens",
+	function(data, paging) {
+		console.log(data);
+	},
+	function() {
+		console.log("failure");
+	});
 }
