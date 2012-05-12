@@ -25,7 +25,7 @@ $(document).ready(function() {
 	player = models.player;
 	
 	$('#goButton').click(function() {
-		$(this).hide();
+		$(this).addClass('small');
 		start();
 	});
 });
