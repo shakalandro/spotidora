@@ -37,6 +37,14 @@ h1 {
 	cursor: pointer;
 }
 
+#goButton.small {
+	background-image: URL("goButtonSmall.png");
+	width: 100px;
+	height: 100px;
+	float: right;
+	margin: 10px;
+}
+
 #instructions {
 	width: 400px;
 	margin-left: auto;

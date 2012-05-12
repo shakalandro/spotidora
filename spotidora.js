@@ -26,6 +26,7 @@ $(document).ready(function() {
 	
 	$('#goButton').click(function() {
 		$(this).hide();
+        $('#instructions').hide();
 		start();
 	});
 });
