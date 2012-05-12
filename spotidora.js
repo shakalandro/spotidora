@@ -18,12 +18,19 @@ $(document).ready(function() {
 	
 	player = models.player;
 	
+	$('#goButton').click(function() {
+		$(this).hide();
+		start();
+	});
+});
+
+function start() {
 	auth.authenticateWithFacebook('345161178882446', ['friends_status',
 												  'friends_actions.music'], {
 		onSuccess : function(accessToken, ttl) {
 			console.log("Success! Here's the access token: " + accessToken);
 			fbAccess = accessToken;
-			init();
+			getUserFriends();
 		},
 	
 		onFailure : function(error) {
@@ -39,19 +46,7 @@ $(document).ready(function() {
 	if (!localStorage.seen) {
 		localStorage.seen = JSON.stringify([]);
 	}
-	
-	/*
-	var views = views = sp.require("sp://import/scripts/api/views");
-
-	var tpl = new models.Playlist();
-	var tempList = new views.List(tpl);
-	tpl.add(models.Track.fromURI("spotify:track:3zpYM630ntLtWOyJu1divO"));
-	tpl.add(models.Track.fromURI("spotify:track:7FmI3ygVG04KIhikMHKOKB"));
-	tpl.add(models.Track.fromURI("spotify:track:4X4ZHPOgp5DLh3tYZD5YYU"));
-	
-	document.getElementById('trackListWrapper').appendChild(tempList.node);
-	*/
-});
+}
 
 
 function addSongToMainList (track) {
@@ -124,7 +119,7 @@ function testLocalStorage () {
     }
 }
 
-function init() {
+function go() {
 	console.log("Spotidora App Starting");
     updatePageWithTrackDetails();
     getUserFriends();
@@ -173,7 +168,7 @@ function filterSongs(friendsSongs) {
 						id: songId,
 						title: songTitle,
 						stamp: time
-					});
+					});	
 					heard[songId] = [from];
 				} else {
 					heard[songId].push(from);
@@ -216,6 +211,7 @@ function addSongToPlayList(songId, songTitle) {
 	void failure(xhr, status);
 */
 function makeFBAjaxCall(url, success, failure) {
+	console.log("Making Ajax call to " + url);
 	$.ajax({
         url: url,
 		data: {access_token: fbAccess},
