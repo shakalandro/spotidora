@@ -90,6 +90,10 @@ function makeFBAjaxCall(url) {
 	
 }
 
+function getFriendsMusicTastes() {
+	
+}
+
 function updatePageWithTrackDetails() {
     var header = document.getElementById("header");
 
