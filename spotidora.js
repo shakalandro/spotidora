@@ -1,5 +1,6 @@
 var sp;
 var models;
+var views;
 var auth;
 var player;
 var fbAccess;
@@ -10,6 +11,7 @@ $(document).ready(function() {
 	sp = getSpotifyApi(1);
 	models = sp.require('sp://import/scripts/api/models');
 	auth = sp.require('sp://import/scripts/api/auth');
+	views = sp.require("sp://import/scripts/api/views");
 	
 	player = models.player;
 	
@@ -36,7 +38,7 @@ $(document).ready(function() {
 	}
 	
 	/*
-	var views = sp.require("sp://import/scripts/api/views");
+	var views = views = sp.require("sp://import/scripts/api/views");
 
 	var tpl = new models.Playlist();
 	var tempList = new views.List(tpl);
@@ -49,7 +51,18 @@ $(document).ready(function() {
 });
 
 
+function addSongToMainList (track) {
+	var tpl = new models.Playlist();
+	tpl.add(track);
+	var tempList = new views.list(tpl);
+	document.getElementById('trackListWrapper').appendChild(tempList.node);
+}
+
 //https://developer.spotify.com/technologies/apps/docs/beta/833e3a06d6.html
+function getPlayListWithName(playlistName) {
+	var toReturn = models.Playlist.fromName(playlistName);
+}
+
 function createPlaylist(searchQuery, playlistName) {
 	var myAwesomePlaylist = new models.Playlist(playlistName);
 	var search = new models.Search(searchQuery);
@@ -68,6 +81,46 @@ function createPlaylist(searchQuery, playlistName) {
 	});
 }
 
+// Returns top song with the given data.
+function getTrackWithData (songData) {
+	var toReturn;
+	var search = new models.Search(songName);
+	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
+	search.observe(models.EVENT.CHANGE, function() {
+		search.tracks.forEach(function(track) {
+			toReturn = track;
+		});
+	});
+	for (i = 0; i < 1; i++) {
+		search.appendNext();
+	}
+	return toReturn;	
+}
+
+// Returns array with 5 or less songs of the given name.
+function getSongsWithName (songName) {
+	var toReturn = [];
+	var search = new models.Search(songName);
+	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
+	search.observe(models.EVENT.CHANGE, function() {
+		search.tracks.forEach(function(track) {
+			toReturn.push(track);
+		});
+	});
+	for (i = 0; i < 5; i++) {
+		search.appendNext();
+	}
+	return toReturn;
+}
+
+function testLocalStorage () {
+    if (localStorage)  {
+        console.log("Local storage supported");  
+    } else  {
+        console.log("Local storage unsupported");
+    }
+}
+
 function init() {
 	console.log("Spotidora App Starting");
     updatePageWithTrackDetails();
@@ -79,16 +132,6 @@ function init() {
             updatePageWithTrackDetails();
         }
     });
-}
-
-function getUserFriends() {
-	makeFBAjaxCall("https://graph.facebook.com/me/friends",
-		function(friends) {
-			getMusic(friends);
-	    }, function() {
-			$('body').append('friends error');
-		}
-	);
 }
 
 /*
@@ -142,14 +185,12 @@ function upvoteSong(friend, song) {
 }
 
 function downvoteSong(friend, song) {
-	
 }
 
 /**
  * Adds a song to the playlist
  */
 function addSongToPlayList(songData) {
-
 }
 
 /*
@@ -167,6 +208,10 @@ function makeFBAjaxCall(url, success, failure) {
     }).done(function(data) {
     	success(data['data'], data['paging']);
     }).fail(failure);
+}
+
+function getFriendsMusicTastes() {
+	var friendId;
 }
 
 function updatePageWithTrackDetails() {
