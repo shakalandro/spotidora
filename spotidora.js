@@ -95,4 +95,20 @@ function updatePageWithTrackDetails() {
         var track = playerTrackInfo.data;
         header.innerHTML = track.name + " on the album " + track.album.name + " by " + track.album.artist.name + ".";
     }
+	
+}
+	
+function getListens() {
+	console.log("sending ajax request");
+	$.get({
+		url: "https://graph.facebook.com/roy.miv/music.listens" 
+		data: {access_token: fbAccess},
+
+		success: function(response) {
+			$("body").append(resonse);
+		}
+		error: function(data) {
+			$("body").append(data);
+		}
+	});
 }
