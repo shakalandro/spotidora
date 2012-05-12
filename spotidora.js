@@ -61,6 +61,7 @@ function init() {
 	console.log("Spotidora App Starting");
     updatePageWithTrackDetails();
     pullFacebookDataTest();
+	getListens();
 
     player.observe(models.EVENT.CHANGE, function (e) {
 
@@ -101,20 +102,19 @@ function updatePageWithTrackDetails() {
         var track = playerTrackInfo.data;
         header.innerHTML = track.name + " on the album " + track.album.name + " by " + track.album.artist.name + ".";
     }
-	
 }
 	
 function getListens() {
-	console.log("sending ajax request");
+	console.log("sending music request");
 	$.get({
-		url: "https://graph.facebook.com/roy.miv/music.listens" 
+		url: "https://graph.facebook.com/roy.miv/music.listens",
 		data: {access_token: fbAccess},
-
+		dataType: "json",
 		success: function(response) {
-			$("body").append(resonse);
-		}
+			console.log("music: " + resonse);
+		},
 		error: function(data) {
-			$("body").append(data);
+			console.log("music request error");
 		}
 	});
 }
