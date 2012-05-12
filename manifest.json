@@ -1,6 +1,6 @@
 {
     "BundleType": "Application",
-    "BundleIdentifier": "Spotidora",
+    "BundleIdentifier": "spotidora",
     "BundleVersion": "1.0",
     "AppIcon": {
         "36x18": "tutorial.png"
