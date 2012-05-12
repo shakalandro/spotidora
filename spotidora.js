@@ -1,5 +1,6 @@
 var sp;
 var models;
+var views;
 var auth;
 var player;
 var fbAccess;
@@ -8,6 +9,7 @@ $(document).ready(function() {
 	sp = getSpotifyApi(1);
 	models = sp.require('sp://import/scripts/api/models');
 	auth = sp.require('sp://import/scripts/api/auth');
+	views = sp.require("sp://import/scripts/api/views");
 	
 	player = models.player;
 	
@@ -26,8 +28,9 @@ $(document).ready(function() {
 		onComplete : function() { }
 	});
 	testLocalStorage();
+	//console.log(masterPlaylist.toString());
 	/*
-	var views = sp.require("sp://import/scripts/api/views");
+	var views = views = sp.require("sp://import/scripts/api/views");
 
 	var tpl = new models.Playlist();
 	var tempList = new views.List(tpl);
@@ -40,7 +43,18 @@ $(document).ready(function() {
 });
 
 
+function addSongToMainList (track) {
+	var tpl = new models.Playlist();
+	tpl.add(track);
+	var tempList = new views.list(tpl);
+	document.getElementById('trackListWrapper').appendChild(tempList.node);
+}
+
 //https://developer.spotify.com/technologies/apps/docs/beta/833e3a06d6.html
+function getPlayListWithName(playlistName) {
+	var toReturn = models.Playlist.fromName(playlistName);
+}
+
 function createPlaylist(searchQuery, playlistName) {
 	var myAwesomePlaylist = new models.Playlist(playlistName);
 	var search = new models.Search(searchQuery);
