@@ -27,6 +27,36 @@ $(document).ready(function() {
 	});
 });
 
+exports.init = init;
+
+
+/* Playlist stuff starts */
+
+var myAwesomePlaylist = new models.Playlist("My Awesome Playlist");
+var daftPunkSearch = new models.Search("Daft Punk");
+daftPunkSearch.localResults = models.LOCALSEARCHRESULTS.APPEND;
+
+daftPunkSearch.tracks.forEach(function(track) {
+	//myAwesomePlaylist.add(track.name);
+	console.log(track.name);
+});
+
+// Currently playing. 
+//myAwesomePlaylist.add(models.player.track);
+myAwesomePlaylist.observe(models.EVENT.RENAME, function() {
+	console.log("Playlist renamed!");
+});
+
+/* Playlist stuff ends */
+
+auth.authenticateWithFacebook('345161178882446', ['friends_status',
+												  'friends_actions.music',
+												  'user_actions.music'], {
+	onSuccess : function(accessToken, ttl) {
+		console.log("Success! Here's the access token: " + accessToken);
+		fbAccess = accessToken;
+		getListens();
+	},
 
 //https://developer.spotify.com/technologies/apps/docs/beta/833e3a06d6.html
 function createPlaylist(searchQuery, playlistName) {
@@ -85,3 +115,20 @@ function updatePageWithTrackDetails() {
         header.innerHTML = track.name + " on the album " + track.album.name + " by " + track.album.artist.name + ".";
     }
 }
+
+/*
+function getListens() {
+	console.log("sending ajax request");
+	$.get({
+		url: "https://graph.facebook.com/roy.miv/music.listens?access_token=" + fbAccess ,
+		success: function(response) {
+			console.log("response received: " + response);
+			var data = $("<p>");
+			data.innerHTML = response;
+			$("music").addChild(response);
+		}
+		error: function(data) {
+			console.log("request failed: " + data);
+		}
+	});
+}*/
