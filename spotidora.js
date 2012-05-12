@@ -6,6 +6,7 @@ var player;
 var fbAccess;
 
 var SPOTIFY_APP_NAME = 'Spotify';
+var NUM_SONGS = 100;
 
 $(document).ready(function() {
 	//remove me!!!!!!!!!!!!!
@@ -22,6 +23,8 @@ $(document).ready(function() {
 		$(this).hide();
 		start();
 	});
+	addSongToMainList(getSongWithName("blah"));
+	
 });
 
 function start() {
@@ -49,6 +52,7 @@ function start() {
 }
 
 function addSongToMainList (track) {
+	console.log("Adding " + track + " to main list.");
 	var tpl = new models.Playlist();
 	var tempList = new views.List(tpl);
 	tpl.add(track);
@@ -95,28 +99,27 @@ function getTrackWithData (songData) {
 	return toReturn;	
 }
 
-// Returns array with 5 or less songs of the given name.
+// Returns array with 1 or less songs of the given name.
 function getSongWithName (songName) {
 	console.log("Getting song with name " + songName);
-	/*
 	var toReturn = [];
-	var search = new models.Search(songName);
+	var search = new models.Search("Paranoid Android");
 	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
 	search.observe(models.EVENT.CHANGE, function() {
-		search.tracks.forEach(function(track) {
-			toReturn.push(track);
-		});
+		if (search.tracks[0]) {
+			console.log("Got track " + search.tracks[0] );
+			return search.tracks[0];
+		}
 	});
 	for (i = 0; i < 1; i++) {
 		search.appendNext();
 	}
-	*/
-	//return toReturn;
+	//return toReturn[0];
 }
 
 function testLocalStorage () {
     if (localStorage)  {
-        console.log("Local storage supported");  
+        console.log("Local storage supported");
     } else  {
         console.log("Local storage unsupported");
     }
@@ -152,38 +155,39 @@ function getUserFriends() {
  * Currently filters out old fb post and duplicate songs.
  *
  */
-function filterSongs(friendsSongs) {
-	console.log("Filtering songs!");
+
+function filterSongs(uid, songs) {
 	var newSongs = [];
 	console.log(localStorage.seen);
 	var seen = JSON.parse(localStorage.seen);
 	var heard = JSON.parse(localStorage.heard);
-	$.each(friendsSongs, function(friendId, songs) {
-		$.each(songs, function(idx, s) {
-			if (s['application']['name'] == SPOTIFY_APP_NAME &&
-					seen.indexOf(s['id']) == -1) {
-				var from = friendId;
-				var songId = s['data']['song']['id'];
-				var songTitle = s['data']['song']['title'];
-				var time = s['start_time'];
-				console.log(songId, songTitle, time);
-				if (heard.indexOf(songId) == -1) {
-					newSongs.push({
-						id: songId,
-						title: songTitle,
-						stamp: time
-					});	
-					heard[songId] = [from];
-				} else {
-					heard[songId].push(from);
-				}
-				seen.push(s['id']);
+	$.each(songs, function(idx, s) {
+		if (s['application']['name'] == SPOTIFY_APP_NAME &&
+				seen.indexOf(s['id']) == -1) {
+			var from = friendId;
+			var songId = s['data']['song']['id'];
+			var songTitle = s['data']['song']['title'];
+			var time = s['start_time'];
+			console.log(songId, songTitle, time);
+			if (heard.indexOf(songId) == -1) {
+				newSongs.push({
+					id: songId,
+					title: songTitle,
+					stamp: time
+				});	
+				heard[songId] = [from];
+			} else {
+				heard[songId].push(from);
 			}
-		});
+			seen.push(s['id']);
+		}
 	});
-	$.each(newSongs, function(idx, obj) {
-		addSongToPlayList(obj['id'], obj['title']);
+	newSongs.sort(function(s1, s2) {
+		return (new Date(s1['stamp'])) < (new Date(s2['stamp']));
 	});
+	for (var i = 0; i < NUM_SONGS; i++) {
+		addSongToPlayList(newSongs[i]['id'], newSongs[i]['title']);
+	}
 	localStorage.heard = JSON.stringify(heard);
 	localStorage.seen = JSON.stringify(seen);
 }
@@ -193,8 +197,20 @@ function filterSongs(friendsSongs) {
  */
 function addSongToPlayList(id, songTitle) {
 	console.log("Adding " + songTitle + " to main playlist");
-	var track = getSongWithName(songTitle);
-	//addSongToMainList(track);
+	//var track = getSongWithName(songTitle);
+	console.log("Getting song with name " + songTitle);
+	var toReturn = [];
+	var search = new models.Search(songTitle);
+	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
+	search.observe(models.EVENT.CHANGE, function() {
+		if (search.tracks[0]) {
+			console.log("Got track " + search.tracks[0] );
+			addSongToMainList(track);
+		}
+	});
+	for (i = 0; i < 1; i++) {
+		search.appendNext();
+	}
 }
 
 
