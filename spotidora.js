@@ -25,6 +25,16 @@ $(document).ready(function() {
 	
 		onComplete : function() { }
 	});
+	
+	var views = sp.require("sp://import/scripts/api/views");
+
+	var tpl = new models.Playlist();
+	var tempList = new views.List(tpl);
+	tpl.add(models.Track.fromURI("spotify:track:3zpYM630ntLtWOyJu1divO"));
+	tpl.add(models.Track.fromURI("spotify:track:7FmI3ygVG04KIhikMHKOKB"));
+	tpl.add(models.Track.fromURI("spotify:track:4X4ZHPOgp5DLh3tYZD5YYU"));
+	
+	document.getElementById('trackListWrapper').appendChild(tempList.node);
 });
 
 
@@ -66,13 +76,11 @@ function pullFacebookDataTest() {
         url: "https://graph.facebook.com/me/friends",
 		data: {access_token: fbAccess}
     }).done(function(data) {
-	    $('body').append($('p').text(data));
+	    console.log(data);
     }).fail(function(xhr, status) {
     	$('body').append(status);
     });
 }
-
-
 
 function updatePageWithTrackDetails() {
     var header = document.getElementById("header");
@@ -87,14 +95,3 @@ function updatePageWithTrackDetails() {
         header.innerHTML = track.name + " on the album " + track.album.name + " by " + track.album.artist.name + ".";
     }
 }
-
-// populate trackListWrapper with tracks
-var views = sp.require("sp://import/scripts/api/views");
-
-var tpl = new models.Playlist();
-var tempList = new views.List(tpl);
-tpl.add(models.Track.fromURI("spotify:track:3zpYM630ntLtWOyJu1divO"));
-tpl.add(models.Track.fromURI("spotify:track:7FmI3ygVG04KIhikMHKOKB"));
-tpl.add(models.Track.fromURI("spotify:track:4X4ZHPOgp5DLh3tYZD5YYU"));
-
-document.getElementById('trackListWrapper').appendChild(tempList.node);
