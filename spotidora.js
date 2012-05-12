@@ -31,10 +31,10 @@ $(document).ready(function() {
 	});
 	
 	if (!localStorage.heard) {
-		localStorage.heard = [];
+		localStorage.heard = JSON.stringify([]);
 	}
 	if (!localStorage.seen) {
-		localStorage.seen = [];
+		localStorage.seen = JSON.stringify([]);
 	}
 	//addSongToMainList(models.Track.fromURI("spotify:track:3zpYM630ntLtWOyJu1divO"));
 	//addSongToMainList(models.Track.fromURI("spotify:track:3zpYM630ntLtWOyJu1divO"));
@@ -142,6 +142,16 @@ function init() {
     });
 }
 
+function getUserFriends() {
+	makeFBAjaxCall("https://graph.facebook.com/me/friends",
+		function(friends) {
+			getMusic(friends);
+  	    }, function() {
+			$('body').append('friends error');
+		}
+	);	
+}
+
 /*
  * takes an associative array friendsSongs[friend][song]
  * and filters songs that are added to the playlist
@@ -152,31 +162,36 @@ function init() {
 function filterSongs(friendsSongs) {
 	console.log("Filtering songs!");
 	var newSongs = [];
+	var heard = JSON.parse(localStorage.heard);
+	var seen = JSON.parse(localStorage.seen);
 	$.each(friendsSongs, function(friendId, songs) {
 		$.each(songs, function(idx, s) {
 			if (s['application']['name'] == SPOTIFY_APP_NAME &&
-					localStorage.seen.indexOf(s['id']) == -1) {
+					seen.indexOf(s['id']) == -1) {
 				var from = friendId;
 				var songId = s['data']['song']['id'];
 				var songTitle = s['data']['song']['title'];
 				var time = s['start_time']
-				if (localStorage.heard.indexOf(songId) == -1) {
+				if (heard.indexOf(songId) == -1) {
 					newSongs.push({
 						id: songId,
 						title: songTitle,
 						stamp: time
 					});
-					localStorage.heard[songId] = [from];
+					heard[songId] = [from];
 				} else {
-					localStorage.heard[songId].push(from);
+					heard[songId].push(from);
 				}
-				localStorage.seen.push(s['id']);
+				seen.push(s['id']);
 			}
 		});
 	});
 	$.each(newSongs, function(idx, obj) {
 		addSongToPlayList(obj['id'], obj['songTitle']);
 	});
+	console.log(heard);
+	localStorage.heard = heard;
+	localStorage.seen = seen;
 }
 
 /**
