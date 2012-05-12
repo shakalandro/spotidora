@@ -29,7 +29,7 @@ $(document).ready(function() {
 
 
 //https://developer.spotify.com/technologies/apps/docs/beta/833e3a06d6.html
-function createTestPlaylist(searchQuery, playlistName) {
+function createPlaylist(searchQuery, playlistName) {
 	var myAwesomePlaylist = new models.Playlist(playlistName);
 	var search = new models.Search(searchQuery);
 	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
