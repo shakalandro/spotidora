@@ -162,8 +162,9 @@ function getUserFriends() {
 function filterSongs(friendsSongs) {
 	console.log("Filtering songs!");
 	var newSongs = [];
-	var heard = JSON.parse(localStorage.heard);
+	console.log(localStorage.seen);
 	var seen = JSON.parse(localStorage.seen);
+	var heard = JSON.parse(localStorage.heard);
 	$.each(friendsSongs, function(friendId, songs) {
 		$.each(songs, function(idx, s) {
 			if (s['application']['name'] == SPOTIFY_APP_NAME &&
@@ -190,8 +191,8 @@ function filterSongs(friendsSongs) {
 		addSongToPlayList(obj['id'], obj['songTitle']);
 	});
 	console.log(heard);
-	localStorage.heard = heard;
-	localStorage.seen = seen;
+	localStorage.heard = JSON.stringify(heard);
+	localStorage.seen = JSON.stringify(seen);
 }
 
 /**
@@ -210,7 +211,7 @@ function addSongToPlayList(id, songTitle) {
 */
 
 function upvoteSong(friend, song) {
-	localStorage.friend
+
 }
 
 function downvoteSong(friend, song) {
