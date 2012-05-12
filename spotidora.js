@@ -5,10 +5,12 @@ var player = models.player;
 exports.init = init;
 
 require("auth");
+require("https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js");
 
 function init() {
 	console.log("Spotidora App Starting");
     updatePageWithTrackDetails();
+    pullFacebookDataTest();
 
     player.observe(models.EVENT.CHANGE, function (e) {
 
@@ -16,6 +18,15 @@ function init() {
         if (e.data.curtrack == true) {
             updatePageWithTrackDetails();
         }
+    });
+}
+
+function pullFacebookDataTest() {
+    $.ajax({
+        url: "http://graph.facebook.com/me/friends",
+	data: {access_token: fbAccess}
+    }).done(function(data) {
+	    $('body').append(data);
     });
 }
 
