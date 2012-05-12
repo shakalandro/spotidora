@@ -6,6 +6,7 @@ var player;
 var fbAccess;
 
 var SPOTIFY_APP_NAME = 'Spotify';
+var NUM_SONGS = 100;
 
 var songsRemaining = 200;
 var friendsChecked = 0;
@@ -118,7 +119,7 @@ function getSongsWithName (songName) {
 
 function testLocalStorage () {
     if (localStorage)  {
-        console.log("Local storage supported");  
+        console.log("Local storage supported");
     } else  {
         console.log("Local storage unsupported");
     }
@@ -154,36 +155,37 @@ function getUserFriends() {
  * Currently filters out old fb post and duplicate songs.
  *
  */
-function filterSongs(friendsSongs) {
+function filterSongs(uid, songs) {
 	var newSongs = [];
 	var seen = JSON.parse(localStorage.seen);
 	var heard = JSON.parse(localStorage.heard);
-	$.each(friendsSongs, function(friendId, songs) {
-		$.each(songs, function(idx, s) {
-			if (s['application']['name'] == SPOTIFY_APP_NAME &&
-					seen.indexOf(s['id']) == -1) {
-				var from = friendId;
-				var songId = s['data']['song']['id'];
-				var songTitle = s['data']['song']['title'];
-				var time = s['start_time'];
-				console.log(songId, songTitle, time);
-				if (heard.indexOf(songId) == -1) {
-					newSongs.push({
-						id: songId,
-						title: songTitle,
-						stamp: time
-					});	
-					heard[songId] = [from];
-				} else {
-					heard[songId].push(from);
-				}
-				seen.push(s['id']);
+	$.each(songs, function(idx, s) {
+		if (s['application']['name'] == SPOTIFY_APP_NAME &&
+				seen.indexOf(s['id']) == -1) {
+			var from = friendId;
+			var songId = s['data']['song']['id'];
+			var songTitle = s['data']['song']['title'];
+			var time = s['start_time'];
+			console.log(songId, songTitle, time);
+			if (heard.indexOf(songId) == -1) {
+				newSongs.push({
+					id: songId,
+					title: songTitle,
+					stamp: time
+				});	
+				heard[songId] = [from];
+			} else {
+				heard[songId].push(from);
 			}
-		});
+			seen.push(s['id']);
+		}
 	});
-	$.each(newSongs, function(idx, obj) {
-		addSongToPlayList(obj['id'], obj['title']);
+	newSongs.sort(function(s1, s2) {
+		return (new Date(s1['stamp'])) < (new Date(s2['stamp']));
 	});
+	for (var i = 0; i < NUM_SONGS; i++) {
+		addSongToPlayList(newSongs[i]['id'], newSongs[i]['title']);
+	}
 	localStorage.heard = JSON.stringify(heard);
 	localStorage.seen = JSON.stringify(seen);
 }
