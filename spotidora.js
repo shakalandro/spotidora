@@ -60,9 +60,11 @@ function authenticate() {
 }
 
 function start() {
-	playlistModel = new models.Playlist();
-	var list = new views.List(playlistModel);	
-	$('#playlist').append(list.node);
+	if (!playlistModel) {
+		playlistModel = new models.Playlist();
+		var list = new views.List(playlistModel);	
+		$('#playlist').append(list.node);
+	}
 	
 	makeFBAjaxCall("https://graph.facebook.com/me/friends",
 		function(myfriends) {
