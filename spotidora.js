@@ -1,241 +1,173 @@
-var sp;
-var models;
-var views;
-var auth;
-var player;
-var fbAccess;
-
 var SPOTIFY_APP_NAME = 'Spotify';
-var NUM_SONGS = 10;
+var TOTAL_SONG_POSTS = 100;
+var TOTAL_NUM_SONGS = 50;
+var SONGS_PER_PERSON = 8;
+// The rate in milliseconds that we make api requests
+var SONG_RATE = 100;
+var LOADER_SPEED = 100;
 
-var songsRemaining = 200;
+var sp = getSpotifyApi(1);
+var models = sp.require('sp://import/scripts/api/models');
+var auth = sp.require('sp://import/scripts/api/auth');
+var views = sp.require("sp://import/scripts/api/views");
+
+var fbAccess;
+var player;
+var playlistModel;
+var playlistView;
+
 var friendsChecked = 0;
-var requestInterval;
+var songTimer;
+var loaderInterval;
 var friends;
 
 $(document).ready(function() {
-	//remove me!!!!!!!!!!!!!
+	$('#loader').hide();
 	localStorage.clear();
 
-	sp = getSpotifyApi(1);
-	models = sp.require('sp://import/scripts/api/models');
-	auth = sp.require('sp://import/scripts/api/auth');
-	views = sp.require("sp://import/scripts/api/views");
-	
-	player = models.player;
-	player.canPlayNext = true;
-	player.canPlayPrevious = true;
-	
-	$('#goButton').click(function() {
-        $('#instructions').hide();
-		$(this).addClass('small');
-		start();
-	});
-	addSongToMainList(getSongWithName("blah"));
-	
-});
-
-function start() {
-	auth.authenticateWithFacebook('345161178882446', ['friends_status',
-												  'friends_actions.music'], {
-		onSuccess : function(accessToken, ttl) {
-			console.log("Success! Here's the access token: " + accessToken);
-			fbAccess = accessToken;
-			getUserFriends();
-		},
-	
-		onFailure : function(error) {
-			console.log("Authentication failed with error: " + error);
-		},
-	
-		onComplete : function() { }
-	});
-	
 	if (!localStorage.heard) {
-		localStorage.heard = JSON.stringify([]);
+		localStorage.heard = JSON.stringify({});
 	}
 	if (!localStorage.seen) {
 		localStorage.seen = JSON.stringify([]);
 	}
-}
 
-function addSongToMainList (track, friend) {
-	if (track) {
-		console.log("Adding " + track + " to main list.");
-		var tpl = new models.Playlist();
-		var tempList = new views.List(tpl);
-		
-		tpl.add(track);
-		console.log($(tempList.node).append($('<span>' + friend + '</span>').addClass('fromFriend')));
-		document.getElementById('trackListWrapper').appendChild(tempList.node);
-	}
-}
-
-
-//https://developer.spotify.com/technologies/apps/docs/beta/833e3a06d6.html
-function getPlayListWithName(playlistName) {
-	var toReturn = models.Playlist.fromName(playlistName);
-}
-
-function createPlaylist(searchQuery, playlistName) {
-	var myAwesomePlaylist = new models.Playlist(playlistName);
-	var search = new models.Search(searchQuery);
-	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
-	search.observe(models.EVENT.CHANGE, function() {
-		search.tracks.forEach(function(track) {
-			//console.log(track.name);
-			myAwesomePlaylist.add(track);
-		});
+	$('#goButton').click(function() {
+        $('#instructions').hide();
+        $('#loader').show();
+        loaderInterval = setInterval(function() {
+        	var old = parseInt($('#loader').css('backgroundPositionX'));
+        	$('#loader').css('backgroundPositionX', (old + 30) % 360 + 'px');
+        }, LOADER_SPEED);
+		$(this).addClass('small');
+		authenticate();
 	});
-	search.appendNext();
-	// Currently playing. 
-	//myAwesomePlaylist.add(models.player.track);
-	myAwesomePlaylist.observe(models.EVENT.RENAME, function() {
-		console.log("Playlist renamed!");
-	});
-}
+});
 
-// Returns top song with the given data.
-function getTrackWithData (songData) {
-	var toReturn;
-	var search = new models.Search(songName);
-	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
-	search.observe(models.EVENT.CHANGE, function() {
-		search.tracks.forEach(function(track) {
-			toReturn = track;
-		});
-	});
-	for (i = 0; i < 1; i++) {
-		search.appendNext();
-	}
-	return toReturn;	
-}
-
-// Returns array with 1 or less songs of the given name.
-function getSongWithName (songName) {
-	console.log("Getting song with name " + songName);
-	var toReturn = [];
-	var search = new models.Search("Paranoid Android");
-	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
-	search.observe(models.EVENT.CHANGE, function() {
-		if (search.tracks[0]) {
-			console.log("Got track " + search.tracks[0] );
-			return search.tracks[0];
+function authenticate() {
+	auth.authenticateWithFacebook('345161178882446',
+			['friends_status', 'friends_actions.music'], {
+		onSuccess : function(accessToken, ttl) {
+			console.log("Authentication Success! Here's the access token: " + accessToken);
+			fbAccess = accessToken;
+			start();
+		}, onFailure : function(error) {
+			console.log("Authentication failed with error: " + error);
+		}, onComplete : function() {
+			console.log("Authentication finished");
 		}
 	});
-	for (i = 0; i < 1; i++) {
-		search.appendNext();
-	}
-	//return toReturn[0];
 }
 
-function testLocalStorage () {
-    if (localStorage)  {
-        console.log("Local storage supported");
-    } else  {
-        console.log("Local storage unsupported");
-    }
-}
-
-function go() {
-	console.log("Spotidora App Starting");
-    updatePageWithTrackDetails();
-    getUserFriends();
-
-    player.observe(models.EVENT.CHANGE, function (e) {
-        // Only update the page if the track changed
-        if (e.data.curtrack == true) {
-            updatePageWithTrackDetails();
-        }
-    });
-}
-
-function getUserFriends() {
+function start() {
+	playlistModel = new models.Playlist();
+	var list = new views.List(playlistModel);	
+	$('#playlist').append(list.node);
+	
 	makeFBAjaxCall("https://graph.facebook.com/me/friends",
 		function(myfriends) {
-			getMusic(myfriends);
+			friends = myfriends.shuffle();
+			getMusic();
   	    }, function() {
-			$('body').append('friends error');
+			authenticate();
 		}
 	);	
 }
 
-/*
- * takes an associative array friendsSongs[friend][song]
- * and filters songs that are added to the playlist
- *
- * Currently filters out old fb post and duplicate songs.
- *
- */
+function getMusic() {
+	songTimer = setTimeout(function() {
+		requestSongs(0, TOTAL_SONG_POSTS, {});
+	}, SONG_RATE);
+}
 
-function filterSongs(uid, songs) {
+function requestSongs(i, songsLeft, songs) {
+	if (i <= friends.length && songsLeft > 0) {
+		clearTimeout(songTimer);
+		songTimer = null;
+		makeFBAjaxCall("https://graph.facebook.com/" + friends[i].id + "/music.listens",
+			function(data, paging) {
+				if (data.length) {
+					var index = Math.min(SONGS_PER_PERSON, data.length);
+					songsLeft -= index;
+					songs[data[0].from.id] = data.slice(0, index - 1);
+				}
+				songTimer = setTimeout(function() {
+					requestSongs(i + 1, songsLeft, songs);
+				}, SONG_RATE);
+			}, function() {
+				console.log("Could not get songs by friend failure");
+			}
+		);
+	} else {
+		filterSongs(songs);
+	}
+}
+
+function filterSongs(friendSongs) {
 	var newSongs = [];
 	var seen = JSON.parse(localStorage.seen);
 	var heard = JSON.parse(localStorage.heard);
-	$.each(songs, function(idx, s) {
-		if (s['application']['name'] == SPOTIFY_APP_NAME &&
-				seen.indexOf(s['id']) == -1) {
-			var songId = s['data']['song']['id'];
-			var songTitle = s['data']['song']['title'];
-			var time = s['start_time'];
-			var friend = s['from']['name'];
-			console.log(songId, songTitle, time, friend);
-			if (heard.indexOf(songId) == -1) {
-				newSongs.push({
-					id: songId,
-					title: songTitle,
-					from: friend,
-					stamp: time
-				});	
-				heard[songId] = [uid];
-			} else {
-				heard[songId].push(uid);
+	$.each(friendSongs, function(friend, songs) {
+		$.each(songs, function(idx, s) {
+			try {
+				if (seen.indexOf(s.id) == -1) {
+					var songId = s.data.song.id;
+					var songTitle = s.data.song.title;
+					var time = s.start_time;
+					var friend = s.from.name;
+					if (!heard[songId]) {
+						console.log('Song (' + songId + ') ' + songTitle + ' accepted from ' + friend);
+						newSongs.push({
+							stamp: time,
+							from: friend,
+							id: songId,
+							title: songTitle
+						});	
+						heard[songId] = [friend];
+					} else {
+						console.log('Ignoring duplicate song (' + songId + '): ' + songTitle);
+						heard[songId].push(friend);
+					}
+					seen.push(s['id']);
+				} else {
+					console.log('Ignoring duplicate post ' + s['id']);
+				}
+			} catch(e) {
+				console.log('Problem parsing listen post', e, s);
 			}
-			seen.push(s['id']);
-		}
+		});
 	});
+	console.log('Number of accepted songs ' + newSongs.length);
 	newSongs.sort(function(s1, s2) {
 		return (new Date(s1['stamp'])) < (new Date(s2['stamp']));
 	});
-	for (var i = 0; i < Math.min(NUM_SONGS, newSongs.length); i++) {
-		addSongToPlayList(newSongs[i]['id'], newSongs[i]['title'], newSongs[i]['from']);
+	for (var i = 0; i < Math.min(TOTAL_NUM_SONGS, newSongs.length); i++) {
+		addSong(newSongs[i]);
 	}
 	localStorage.heard = JSON.stringify(heard);
 	localStorage.seen = JSON.stringify(seen);
 }
 
-/**
- * Adds a song to the playlist
- */
-function addSongToPlayList(id, songTitle, friend) {
-	console.log("Adding " + songTitle + " to main playlist from " + friend);
-	//var track = getSongWithName(songTitle);
-	console.log("Getting song with name " + songTitle);
-	var toReturn = [];
-	var search = new models.Search(songTitle);
+function addSong(songObj) {
+	var search = new models.Search(songObj['title']);
 	search.localResults = models.LOCALSEARCHRESULTS.APPEND;
 	search.observe(models.EVENT.CHANGE, function() {
 		if (search.tracks[0]) {
-			console.log("Got track " + search.tracks[0] );
-			addSongToMainList(search.tracks[0], friend);
+			console.log("Got track " + search.tracks[0] + ' from ' + songObj['from']);
+			addSongToPlaylist(search.tracks[0], songObj);
 		}
 	});
-	for (i = 0; i < 1; i++) {
-		search.appendNext();
+	search.appendNext();
+}
+
+function addSongToPlaylist(track, songObj) {
+	if (track) {
+		playlistModel.add(track);
+		$('#friends ul').append($('<li>').text(songObj.from));
+		$('#loader').hide();
+		clearInterval(loaderInterval);
+		loaderInterval = null;
 	}
-}
-
-
-/*
-	If we see a song from a friend we have not seen before, then add them to localStorage
-	If we get a vote then set 
-*/
-
-function upvoteSong(friend, song) {
-
-}
-
-function downvoteSong(friend, song) {
 }
 
 /*
@@ -256,47 +188,14 @@ function makeFBAjaxCall(url, success, failure) {
     }).fail(failure);
 }
 
-function getFriendsMusicTastes() {
-	var friendId;
-}
-
-function updatePageWithTrackDetails() {
-    var header = document.getElementById("header");
-
-    // This will be null if nothing is playing.
-    var playerTrackInfo = player.track;
-/*
-    if (playerTrackInfo == null) {
-        //header.innerText = "Nothing playing!";
-    } else {
-        var track = playerTrackInfo.data;
-        //header.innerHTML = track.name + " on the album " + track.album.name + " by " + track.album.artist.name + ".";
-    }
-    */
-}
-	
-function getMusic(myfriends) {
-	friends = myfriends;
-	requestInterval = setInterval(requestSongs, 500);	
-}
-
-function requestSongs() {
-	if (friends.length == 0 || songsRemaining <= 0) {
-		clearInterval(requestInterval);
-	}
-	var index = Math.floor(Math.random() * (friends.length - 10));
-	var makeRequests = friends.splice(index, 10);
-	$.each(makeRequests, function(i, l) {
-		makeFBAjaxCall("https://graph.facebook.com/" + l.id + "/music.listens",
-			function(data, paging) {
-				friendsChecked += makeRequests.length;
-				if (data.length != 0) {
-					songsRemaining -= data.length;
-					filterSongs(data[0].from.id, data);
-				}
-			},
-			function() {
-				console.log("get songs by friend failure");
-			});	
-	});
-}
+Array.prototype.shuffle = function() {
+ 	var len = this.length;
+	var i = len;
+	while (i--) {
+	 	var p = parseInt(Math.random()*len);
+		var t = this[i];
+  		this[i] = this[p];
+  		this[p] = t;
+ 	}
+ 	return this;
+};
