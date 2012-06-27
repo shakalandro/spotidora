@@ -1,12 +1,12 @@
 {
     "BundleType": "Application",
-    "BundleIdentifier": "spotidora",
+    "BundleIdentifier": "exposure",
     "BundleVersion": "1.0",
     "AppIcon": {
         "36x18": "icon.png"
     },
     "AppName": {
-        "en": "Spotidora"
+        "en": "Exposure"
     },
     "SupportedLanguages": [
         "en"

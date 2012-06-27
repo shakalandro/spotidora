@@ -1,4 +1,9 @@
-var SPOTIFY_APP_NAME = 'Spotify';
+/*
+Exposure
+Authors: Roy McElmurry, Tyler Rigsby, Gabriel Groen, Ambar Choudhury
+*/
+
+var SPOTIFY_APP_NAME = 'Exposure';
 var TOTAL_SONG_POSTS = 100;
 var TOTAL_NUM_SONGS = 50;
 var SONGS_PER_PERSON = 8;
