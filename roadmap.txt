@@ -1,0 +1,16 @@
+Features:
+	[ ] Checkbox option for removing duplicate songs
+		- could be session specific or logged in a db and flushed on a schedule
+	[ ] Checkbox option for appending to list or refreshing list,
+			the difference is that the refresh will likely parse duplicate fb music
+			posts, and append would ignore them
+		- could be session specific or logged in a db and flushed on a schedule
+	[ ] Mutually exclusive options for what kind of entropy to optimize for
+		- possible options: friend, song, artist, genre
+	[ ] Allow the user to uprate or downrate the music tastes of a friend and
+			have this reflected in future playlists
+
+Design:
+	[ ] Controls on the bottom
+	[ ] "Now Playing" section that shows song and friend info
+	[ ] Update icon and logo text
