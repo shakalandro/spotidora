@@ -3,16 +3,25 @@
 	<head>
 		<link rel="stylesheet" href="sp://import/css/core-dark.css">
 		<link rel="stylesheet" href="sp://import/css/api.css">
-		<link rel="stylesheet" href="style.css">
+		<link rel="stylesheet" href="exposure.css">
 
 		<script type="text/javascript" src="jquery.js"></script>
 		<script type="text/javascript" src="exposure.js"></script>
 	</head>
 	<body>
-		<h1>Exposure</h1>
-		<div id="goButton"></div>
-		<p id="instructions">Find out what your friends are listening to.</p>
-		<div id="loader"></div>
+		<header>
+			<div id="sortStyles">
+				<div class="clickable">4</div>
+				<div class="clickable">3</div>
+				<div class="clickable">2</div>
+				<div class="clickable">1</div>
+			</div>
+			<h1>Exposure</h1>
+			<div id="goButton" class="clickable"></div>
+			<p id="instructions">Find out what your friends are listening to.</p>
+			<div id="loader"></div>
+		</header>
+		<div id="trackInfo"></div>
 		<div id="playlist"></div>
 		<div id="friends" class="sp-list">
 			<ul></ul>

@@ -4,27 +4,32 @@ Authors: Roy McElmurry, Tyler Rigsby, Gabriel Groen, Ambar Choudhury
 */
 
 var SPOTIFY_APP_NAME = 'Exposure';
-var TOTAL_SONG_POSTS = 100;
+// The number of song posts to read from FB
+var TOTAL_SONG_POSTS = 20;
+// The number of unique songs to read from FB posts
 var TOTAL_NUM_SONGS = 50;
+// The number of songs to parse from a given FB friend
 var SONGS_PER_PERSON = 8;
 // The rate in milliseconds that we make api requests
-var SONG_RATE = 100;
+var SONG_RATE = 50;
+// How quickly does the loader spin
 var LOADER_SPEED = 100;
 
+// Spotify API objects
 var sp = getSpotifyApi(1);
 var models = sp.require('sp://import/scripts/api/models');
 var auth = sp.require('sp://import/scripts/api/auth');
 var views = sp.require("sp://import/scripts/api/views");
 
 var fbAccess;
-var player;
+var player = models.player;
 var playlistModel;
-var playlistView;
 
 var friendsChecked = 0;
 var songTimer;
 var loaderInterval;
 var friends;
+var sortStyle;
 
 $(document).ready(function() {
 	$('#loader').hide();
@@ -47,6 +52,24 @@ $(document).ready(function() {
 		$(this).addClass('small');
 		authenticate();
 	});
+
+	// Set default sort style
+	$('#sortStyles div:last-child').addClass('chosen');
+	sortStyle = 1;
+	$('#sortStyles div').click(function() {
+		$('#sortStyles div').removeClass('chosen');
+		$(this).addClass('chosen');
+		sortStyle = parseInt($(this).text());
+	});
+
+	player.observe(models.EVENT.CHANGE, function(e) {
+		if (player.track != null) {
+			$('#trackInfo').text('Playing: ' + player.track.name)
+				.prepend(player.track.image.node);
+		} else {
+			$('#trackInfo').text('');
+		}
+	});
 });
 
 function authenticate() {
@@ -55,7 +78,7 @@ function authenticate() {
 		onSuccess : function(accessToken, ttl) {
 			console.log("Authentication Success! Here's the access token: " + accessToken);
 			fbAccess = accessToken;
-			start();
+			getFriendsData();
 		}, onFailure : function(error) {
 			console.log("Authentication failed with error: " + error);
 		}, onComplete : function() {
@@ -64,7 +87,7 @@ function authenticate() {
 	});
 }
 
-function start() {
+function getFriendsData() {
 	if (!playlistModel) {
 		playlistModel = new models.Playlist();
 		var list = new views.List(playlistModel);	
@@ -110,6 +133,7 @@ function requestSongs(i, songsLeft, songs) {
 	}
 }
 
+// Parses all of the FB posts and filters out duplicate songs and songs that have already been heard.
 function filterSongs(friendSongs) {
 	var newSongs = [];
 	var seen = JSON.parse(localStorage.seen);
@@ -122,11 +146,13 @@ function filterSongs(friendSongs) {
 					var songTitle = s.data.song.title;
 					var time = s.start_time;
 					var friend = s.from.name;
+					var friendId = s.from.id;
 					if (!heard[songId]) {
 						console.log('Song (' + songId + ') ' + songTitle + ' accepted from ' + friend);
 						newSongs.push({
 							stamp: time,
 							from: friend,
+							fromId: friendId,
 							id: songId,
 							title: songTitle
 						});	
@@ -170,7 +196,8 @@ function addSong(songObj) {
 function addSongToPlaylist(track, songObj) {
 	if (track) {
 		playlistModel.add(track);
-		$('#friends ul').append($('<li>').text(songObj.from));
+		$('#friends ul').append($('<li>').text(songObj.from + ' ')
+			.append($('<img>').attr('src', 'https://graph.facebook.com/' + songObj.fromId + '/picture')));
 		$('#loader').hide();
 		clearInterval(loaderInterval);
 		loaderInterval = null;

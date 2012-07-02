@@ -13,6 +13,10 @@ h1 {
 	border-bottom: 1px solid #666666;
 }
 
+.clickable:hover {
+	cursor: pointer;
+}
+
 #trackListWrapper {
 	width: 70%;
 	margin-left: auto;
@@ -31,19 +35,6 @@ h1 {
 
 #goButton:hover {
 	background-position: 0px 200px;
-	cursor: hand;
-	cursor: pointer;
-}
-
-#loader {
-	background-image: URL("loading_indicator.png");
-	width: 30px;
-	height: 30px;
-	position: absolute;
-	left: 0px;
-	top: 0px;
-	margin: 15px;
-	display: none;
 }
 
 #goButton.small {
@@ -51,13 +42,24 @@ h1 {
 	width: 50px;
 	height: 50px;
 	position: absolute;
-	right: 0px;
+	left: 0px;
 	top: 0px;
 	margin: 5px;
 }
 
 #goButton.small:hover {
 	background-position: 0px 50px;
+}
+
+#loader {
+	background-image: URL("loading_indicator.png");
+	width: 30px;
+	height: 30px;
+	position: absolute;
+	left: 65px;
+	top: 0px;
+	margin: 15px;
+	display: none;
 }
 
 #instructions {
@@ -88,11 +90,43 @@ h1 {
 	color: white;
 	padding-right: 10px;
 	line-height: 20px;
-	background-color: #373737;
+	background-color: #373737;;
+}
+
+#friends ul li img {
+	height: 20px;
+	vertical-align: bottom;
 }
 
 #friends ul li:nth-child(even) {
 	background-color: #313131;
+}
+
+#sortStyles div {
+	float: right;
+	width: 30px;
+	height: 24px;
+	margin-right: 5px;
+	margin-top: 12px;
+	padding-top: 6px;
+	border: 3px solid black;
+	border-radius: 10px;
+	text-align: center;
+	font-size: 15pt;
+	color: white;
+	background-color: #333333;
+}
+
+#sortStyles div:hover {
+	background-color: #666666;
+}
+
+#sortStyles div:first-child {
+	margin-right: 10px;
+}
+
+#sortStyles div.chosen {
+	background-color: grey;
 }
 
 div.sp-list {
