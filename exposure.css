@@ -45,21 +45,22 @@ h1 {
 	left: 0px;
 	top: 0px;
 	margin: 5px;
+	display: none;
 }
 
 #goButton.small:hover {
 	background-position: 0px 50px;
 }
 
-#loader {
-	background-image: URL("loading_indicator.png");
-	width: 30px;
-	height: 30px;
+#throbber {
 	position: absolute;
-	left: 65px;
-	top: 0px;
-	margin: 15px;
-	display: none;
+	top: 15px;
+	left: 60px;
+	color: white;
+}
+
+#throbber img {
+	vertical-align: middle;
 }
 
 #instructions {
@@ -74,32 +75,13 @@ h1 {
 }
 
 #playlist {
-	float: right;
-	width: 80%;
 	height: 100%;
 }
 
-#friends {
-	float: right;
-	text-align: right;
-	width: 20%;
-	background-image: -webkit-linear-gradient(#373737, #373737 50%, #313131 50%, #313131);
-}
-
-#friends ul li {
-	color: white;
-	padding-right: 10px;
-	line-height: 20px;
-	background-color: #373737;;
-}
-
-#friends ul li img {
+.friendPic {
 	height: 20px;
 	vertical-align: bottom;
-}
-
-#friends ul li:nth-child(even) {
-	background-color: #313131;
+	margin-right: 10px;
 }
 
 #sortStyles div {
