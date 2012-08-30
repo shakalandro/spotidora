@@ -1,22 +1,20 @@
 /*
-Exposure
+Exposure, a social music discovery Spotify app
 Authors: Roy McElmurry, Tyler Rigsby, Gabriel Groen, Ambar Choudhury
 */
 
 jQuery(function($) {
-
+	var DEBUG = true;
 
 	var SPOTIFY_APP_NAME = 'Exposure';
 	// The number of song posts to read from FB
-	var TOTAL_SONG_POSTS = 100;
+	var TOTAL_SONG_POSTS = DEBUG ? 50 : 100;
 	// The number of unique songs to read from FB posts
-	var TOTAL_NUM_SONGS = 50;
+	var TOTAL_NUM_SONGS = DEBUG ? 10 : 50;
 	// The number of songs to parse from a given FB friend
 	var SONGS_PER_PERSON = 8;
 	// The rate in milliseconds that we make api requests
 	var SONG_RATE = 50;
-	// How quickly does the loader spin
-	var LOADER_SPEED = 100;
 
 	// Spotify API objects
 	sp = getSpotifyApi(1);
@@ -28,8 +26,6 @@ jQuery(function($) {
 	var player = models.player;
 	var playlistModel;
 
-	var friendsChecked = 0;
-	var friends;
 	var sortStyle;
 
 	$('#throbber').hide();
@@ -61,8 +57,8 @@ jQuery(function($) {
 
 	player.observe(models.EVENT.CHANGE, function(e) {
 		if (player.track != null) {
-			$('#trackInfo')
-				.text('Playing: ' + player.track.name);
+			console.log(player.track);
+			$('#trackInfo').append($('<img>').attr('src', player.track.data.album.cover));
 		} else {
 			$('#trackInfo').empty();
 		}
@@ -87,50 +83,50 @@ jQuery(function($) {
 		$('#throbber span').text('Creeping');
 		makeFBAjaxCall("https://graph.facebook.com/me/friends",
 			function(myfriends) {
-				friends = myfriends.shuffle();
-				getMusic();
+				var friends = myfriends.shuffle();
+				getMusicPosts(friends);
 	  	    }, function() {
 				authenticate();
 			}
 		);
 	}
 
-	function getMusic() {
+	function getMusicPosts(friends) {
 		setTimeout(function() {
-			requestSongs(0, TOTAL_SONG_POSTS, new SongList());
+			getPostsFromFriend(friends, 0, 0, []);
 		}, SONG_RATE);
 	}
 
-	function requestSongs(i, songsLeft, songList) {
-		if (i <= friends.length && songsLeft > 0) {
+	function getPostsFromFriend(friends, i, songsFound, songList) {
+		if (i < friends.length && songsFound <= TOTAL_SONG_POSTS) {
 			makeFBAjaxCall("https://graph.facebook.com/" + friends[i].id + "/music.listens",
 				function(data, paging) {
 					$('#throbber span').text(
 						'Stalking Friends (' +
-						parseInt(((TOTAL_SONG_POSTS - songsLeft) / TOTAL_SONG_POSTS) * 100) +
+						parseInt((songsFound / TOTAL_SONG_POSTS) * 100) +
 						'%)'
 					);
 					if (data.length) {
 						var index = Math.min(SONGS_PER_PERSON, data.length);
-						songsLeft -= index;
-						parseSongData(data.slice(0, index - 1), songList);
+						songsFound += index;
+						parseSongPosts(data.slice(0, index - 1), songList);
 					}
 					setTimeout(function() {
-						requestSongs(i + 1, songsLeft, songList);
+						getPostsFromFriend(friends, i + 1, songsFound, songList);
 					}, SONG_RATE);
 				}, function() {
 					console.log("Could not get songs by friend failure");
 				}
 			);
 		} else {
-			filterSongs(songList);
+			filterSongPosts(songList);
 		}
 	}
 
-	function parseSongData(songs, songList) {
+	function parseSongPosts(songs, songList) {
 		$.each(songs, function(idx, s) {
 			try {
-				songList.add({
+				songList.push({
 					ts: new Date(s.publish_time),
 					friendName: s.from.name,
 					friendID: s.from.id,
@@ -144,13 +140,13 @@ jQuery(function($) {
 	}
 
 	// Parses all of the FB posts and filters out duplicate songs and songs that have already been heard.
-	function filterSongs(songList) {
+	function filterSongPosts(songList) {
 		$('#throbber span').text('Filtering');
-		var seen = JSON.parse(localStorage.seen);
-		var heard = JSON.parse(localStorage.heard);
+		var seen = localStorageGetJSON('seen');
+		var heard = localStorageGetJSON('heard');
 
 		var songs = [];
-		$.each(songList.list, function(idx, s) {
+		$.each(songList, function(idx, s) {
 			if (seen.indexOf(s.songID) == -1) {
 				if (!heard[s.songID]) {
 					songs.push(s);
@@ -165,16 +161,16 @@ jQuery(function($) {
 			}
 		});
 
-		songList.list = songs;
+		songList = songs;
 
-		console.log('Number of accepted songs ' + songList.size());
-		//songList.sortBy('ts');
+		console.log('Number of accepted songs ' + songList.length);
+		//sortBy(songList, 'ts');
 		songList.shuffle();
 
-		displaySongs(songList);
+		displaySongs(songList.slice(TOTAL_NUM_SONGS));
 
-		localStorage.heard = JSON.stringify(heard);
-		localStorage.seen = JSON.stringify(seen);
+		localStorageSetJSON('heard', heard);
+		localStorageSetJSON('seen', seen);
 	}
 
 	function getTimeString(diffmillis) {
@@ -195,7 +191,7 @@ jQuery(function($) {
 		if (!playlistModel) {
 			playlistModel = new models.Playlist();
 			var playlistView = new views.List(playlistModel, function(track) {
-				var exposureData = songList.findBy('uri', track.data.uri);
+				var exposureData = findBy(songList, 'uri', track.data.uri);
 				var trackView = new views.Track(track,
 						views.Track.FIELD.NAME |
            				views.Track.FIELD.ARTIST |
@@ -228,7 +224,7 @@ jQuery(function($) {
 			$('#playlist').append(playlistView.node);
 		}
 
-		getSpotifySongs(0, songList.list);
+		getSpotifySongs(0, songList);
 	}
 
 	function getSpotifySongs(i, songs) {
@@ -252,10 +248,6 @@ jQuery(function($) {
 			});
 			search.appendNext();
 		} else {
-			songList = songs;
-			$.each(songs, function(idx, e) {
-				console.log(e.ts);
-			});
 			$('#throbber').hide();
 			$('#throbber span').empty();
 		}
@@ -281,11 +273,19 @@ jQuery(function($) {
 	    	}).fail(failure);
 	}
 
+	function localStorageGetJSON(key) {
+		return localStorage[key] ? JSON.parse(localStorage[key]) : [];
+	}
+
+	function localStorageSetJSON(key, value) {
+		localStorage[key] = JSON.stringify(value);
+	}
+
 	Array.prototype.shuffle = function() {
 	 	var len = this.length;
 		var i = len;
 		while (i--) {
-		 	var p = parseInt(Math.random()*len);
+		 	var p = parseInt(Math.random() * len);
 			var t = this[i];
 	  		this[i] = this[p];
 	  		this[p] = t;
@@ -297,21 +297,9 @@ jQuery(function($) {
 		return this.getTime() - other.getTime();
 	}
 
-	function SongList() {
-		this.list = [];
-	}
-
-	SongList.prototype.size = function() {
-		return this.list.length;
-	}
-
-	SongList.prototype.add = function(songData) {
-		this.list.push(songData);
-	}
-
-	SongList.prototype.findBy = function(field, value) {
+	function findBy(list, field, value) {
 		var items = [];
-		$.each(this.list, function(idx, song) {
+		$.each(list, function(idx, song) {
 			if (song[field] && song[field] === value) {
 				items.push(song);
 			}
@@ -319,22 +307,10 @@ jQuery(function($) {
 		return items.length ? items : null;
 	}
 
-	SongList.prototype.sortBy = function(field) {
-		console.log(this.list);
-		this.list.sort(function(s1, s2) {
+	function sortBy(list, field) {
+		console.log(list);
+		list.sort(function(s1, s2) {
 			return s1[field] < s2[field];
 		});
-	}
-
-	SongList.prototype.shuffle = function() {
-		this.list.shuffle();
-		return this;
-	}
-
-	SongList.prototype.remove = function(idx) {
-		if (idx >= this.list.length) {
-			console.log('ERROR: tried to remove ' + idx + ', but list has only ' + this.list.length);
-		}
-		return this.list.splice(idx, 1);
 	}
 });
