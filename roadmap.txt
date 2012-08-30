@@ -11,6 +11,6 @@ Features:
 			have this reflected in future playlists
 
 Design:
-	[ ] Controls on the bottom
-	[ ] "Now Playing" section that shows song and friend info
-	[ ] Update icon and logo text
+	[X] Controls on the bottom
+	[X] "Now Playing" section that shows song and friend info
+	[X] Update icon and logo text

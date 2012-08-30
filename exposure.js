@@ -33,6 +33,8 @@ var sortStyle;
 
 $(document).ready(function() {
 	$('#loader').hide();
+	$('#nowPlaying').hide(); 
+	$('#content').hide();
 	localStorage.clear();
 
 	if (!localStorage.heard) {
@@ -44,7 +46,10 @@ $(document).ready(function() {
 
 	$('#goButton').click(function() {
         $('#instructions').hide();
+        $('#nowPlaying').show();
         $('#loader').show();
+        $('#content').show();
+        $('header').removeClass('startHeader');
         loaderInterval = setInterval(function() {
         	var old = parseInt($('#loader').css('backgroundPositionX'));
         	$('#loader').css('backgroundPositionX', (old + 30) % 360 + 'px');

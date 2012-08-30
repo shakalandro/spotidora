@@ -9,22 +9,46 @@
 		<script type="text/javascript" src="exposure.js"></script>
 	</head>
 	<body>
-		<header>
+		<header class="startHeader">
+			<h1>Exposure</h1>
+			<div id="goButton" class="clickable"></div>
+			<p id="instructions">Find out what your friends are listening to.</p>
+			<div id="loader"></div>
+			<div id="nowPlaying">
+				<div id="squareWrapper">
+					<div class="square" id="friendImage"></div>
+					<div class="square square2" id="albumImage"></div>
+				</div>
+				<div id="options">
+					<h3>Sort By</h3>
+					<ul>
+						<li>Most Recent</li>
+						<li>Genre</li>
+						<li>Popularity</li>
+						<li>Friend</li>
+					</ul>
+				</div>
+				<h3 id="friendName">Roy McElmurray<span id="listenedTo">listened to</span></h3>
+				<h2 id="songName">Hello Seattle</h2>
+				<span id="artist">Owl City</span>
+			</div>
+		</header>
+		<div id="content" class="noHeight">
+			<div id="playListWrapper">
+				<div id="trackInfo"></div>
+				<div id="playlist"></div>
+			</div>
+			<div id="friends" class="sp-list">
+				<ul></ul>
+			</div>
+		</div>
+		<footer>
 			<div id="sortStyles">
 				<div class="clickable">4</div>
 				<div class="clickable">3</div>
 				<div class="clickable">2</div>
 				<div class="clickable">1</div>
 			</div>
-			<h1>Exposure</h1>
-			<div id="goButton" class="clickable"></div>
-			<p id="instructions">Find out what your friends are listening to.</p>
-			<div id="loader"></div>
-		</header>
-		<div id="trackInfo"></div>
-		<div id="playlist"></div>
-		<div id="friends" class="sp-list">
-			<ul></ul>
-		</div>
+		</footer>
 	</body>
 </html>
