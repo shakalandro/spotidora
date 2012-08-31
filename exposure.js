@@ -98,56 +98,32 @@ jQuery(function($) {
 		sortStyle = parseInt($(this).text());
 	});
 
-	/*
-var profilePicDiv = $('<div>')
-					.append(
-						$('<div>')
-							.addClass('profilePicWrapper')
-							.append(
-								$('<img>', {
-									'src': exposureData.friendPic + '?type=normal',
-									'class': 'albumFriendPic'
-								})
-							)
-					)
-					.append($('<h3>').text(exposureData.friendName))
-					.append($('<h2>').text(track.data.name))
-					.append($('<h3>').text(track.data.artist));
-
-			$('<div>')
-				.append(
-					$('<div>')
-						.addClass('albumWrapper')
-						.css('background-image', player.track.data.album.cover)
-						.append(profilePicDiv)
-				).prependTo('#trackInfo');
-	*/
-
 	player.observe(models.EVENT.CHANGE, function(e) {
 		if (player.track != null) {
 			var exposureData = findBy(songList, 'uri', player.track.data.uri);
 			console.log(player.track, exposureData);
 
 			var overallWrapper = $('<div>');
-			console.log(overallWrapper);
+
 			var positioningWrapper = $('<div>')
 				.addClass('albumWrapper')
 				.append($('<img>', {
 					'class': 'albumArt',
-					'src': player.track.data.album.cover
+					'src': player.track.data.album.cover,
+					'alt': 'album art'
 				}))
 				.appendTo(overallWrapper);
-			console.log(positioningWrapper);
 
 			var profilePicDiv = $('<div>')
 				.addClass('profilePicWrapper')
 				.append(
 					$('<img>', {
 						'src': exposureData.friendPic + '?type=normal',
-						'class': 'albumFriendPic'
+						'class': 'albumFriendPic',
+						'alt': 'fb profile pic'
 					})
 				);
-			console.log(profilePicDiv);
+
 			var contentWrapper = $('<div>')
 					.addClass('contentWrapper')
 					.append(profilePicDiv)
@@ -155,7 +131,7 @@ var profilePicDiv = $('<div>')
 					.append($('<h2>').text(player.track.data.name + ' by'))
 					.append($('<h3>').text(player.track.data.artists[0].name))
 					.appendTo(positioningWrapper);
-			console.log(contentWrapper);
+
 			$('#trackInfo').prepend(overallWrapper);
 		} else {
 			$('#albumImage').empty();
