@@ -1,7 +1,7 @@
 /*
 Exposure, a social music discovery Spotify app
-Origanal Authors: Roy McElmurry, Tyler Rigsby, Gabriel Groen, Ambar Choudhury
-Major overhaul by Roy McElmurry and Gabriel Groen
+Original Authors: Roy McElmurry, Tyler Rigsby, Gabriel Groen, Ambar Choudhury
+Major overhaul v2.0: Roy McElmurry and Gabriel Groen
 */
 
 jQuery(function($) {
