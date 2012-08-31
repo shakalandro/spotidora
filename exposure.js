@@ -5,6 +5,9 @@ Major overhaul by Roy McElmurry and Gabriel Groen
 */
 
 jQuery(function($) {
+	"use strict";
+	jQuery.error = console.error;
+
 	var DEBUG = true;
 
 	var SPOTIFY_APP_NAME = 'Exposure';
@@ -18,10 +21,10 @@ jQuery(function($) {
 	var SONG_RATE = 100;
 
 	// Spotify API objects
-	sp = getSpotifyApi(1);
-	models = sp.require('sp://import/scripts/api/models');
-	auth = sp.require('sp://import/scripts/api/auth');
-	views = sp.require('sp://import/scripts/api/views');
+	var sp = getSpotifyApi(1);
+	var models = sp.require('sp://import/scripts/api/models');
+	var auth = sp.require('sp://import/scripts/api/auth');
+	var views = sp.require('sp://import/scripts/api/views');
 
 	var fbAccess;
 	var player = models.player;
@@ -40,39 +43,71 @@ jQuery(function($) {
 		localStorage.seen = JSON.stringify([]);
 	}
 
-	$('#goButton, #refreshButton').click(function() {
-		if (!playlistModel) {
-			playlistModel = new models.Playlist();
-			var playlistView = new views.List(playlistModel, function(track) {
-				var exposureData = findBy(songList, 'uri', track.data.uri);
-				var trackView = new views.Track(track,
-						views.Track.FIELD.NAME |
-           				views.Track.FIELD.ARTIST |
-           				views.Track.FIELD.DURATION |
-           				views.Track.FIELD.ALBUM);
+	$('#goButton, #refresh').click(function() {
+		playlistModel = new models.Playlist();
+		var playlistView = new views.List(playlistModel, function(track) {
+			var exposureData = findBy(songList, 'uri', track.data.uri);
+			var trackView = new views.Track(track,
+					views.Track.FIELD.STAR |
+					views.Track.FIELD.SHARE |
+					views.Track.FIELD.NAME |
+       				views.Track.FIELD.ARTIST |
+       				views.Track.FIELD.DURATION);
 
-				//inject name field
-				var name = document.createTextNode(
-					exposureData.friendName + ' (' +
-					getTimeString((new Date()).diff(exposureData.ts)) +
-					')'
-				);
+			//inject heard time column
+			var heardTime = document.createTextNode(getTimeString((new Date()).diff(exposureData.ts)));
 
-				//inject facebook profile pic
-				var img = document.createElement('img');
-				img.src = exposureData.friendPic;
-				img.className = 'friendPic';
-				img.alt = 'facebook profile picture of ' + exposureData.friendName;
+			var heardSpan = document.createElement('span');
+			heardSpan.appendChild(heardTime);
 
-				var span = document.createElement('span');
-				span.appendChild(img);
-				span.appendChild(name);
+			trackView.node.insertBefore(heardSpan, trackView.node.lastChild);
 
-				trackView.node.insertBefore(span, trackView.node.firstChild);
-				return trackView;
-			});
-			$('#playlist').append(playlistView.node);
-		}
+			//inject friend column
+			var friend = document.createTextNode(exposureData.friendName);
+
+			var friendImg = document.createElement('img');
+			friendImg.src = exposureData.friendPic;
+			friendImg.className = 'friendPic';
+			friendImg.alt = 'facebook profile picture of ' + exposureData.friendName;
+
+			var friendSpan = document.createElement('span');
+			friendSpan.appendChild(friendImg);
+			friendSpan.appendChild(friend);
+
+			trackView.node.insertBefore(friendSpan, trackView.node.firstChild.nextSibling.nextSibling);
+
+			return trackView;
+		});
+
+		var columnHeaderData = [
+			{'className': 'star', 'text': ''},
+			{'className': 'share', 'text': ''},
+			{'className': 'friend', 'text': 'Friend'},
+			{'className': 'name', 'text': 'Title'},
+			{'className': 'artist', 'text': 'Artist'},
+			{'className': 'heard', 'text': 'Heard'},
+			{'className': 'duration', 'text': 'Time'},
+		];
+
+		var headers = document.createElement('div');
+		headers.className = 'sp-item';
+
+		var headersList = document.createElement('div');
+		headersList.className = 'sp-list';
+		headersList.id = 'sp-headers';
+		headersList.appendChild(headers);
+
+		$.each(columnHeaderData, function(idx, column) {
+			var span = document.createElement('span');
+			span.className = 'sp-track-field-' + column.className;
+			span.innerHTML = column.text;
+			headers.appendChild(span);
+		});
+
+		$('#playlist')
+			.empty()
+			.append(headersList)
+			.append(playlistView.node);
 
         $('#instructions').hide();
         $('#throbber').show();
@@ -99,6 +134,7 @@ jQuery(function($) {
 	});
 
 	player.observe(models.EVENT.CHANGE, function(e) {
+		console.log('Player Event:', e);
 		if (player.track != null) {
 			var exposureData = findBy(songList, 'uri', player.track.data.uri);
 			console.log(player.track, exposureData);
@@ -133,8 +169,6 @@ jQuery(function($) {
 					.appendTo(positioningWrapper);
 
 			$('#trackInfo').prepend(overallWrapper);
-		} else {
-			$('#albumImage').empty();
 		}
 	});
 
@@ -227,12 +261,12 @@ jQuery(function($) {
 					songs.push(s);
 					heard[s.songID] = [s.friendID];
 				} else {
-					console.log('Ignoring duplicate song (' + s.songID + '): ' + s.songTitle);
+					console.log('Ignoring duplicate song (' + s.songID + '): ' + s.songTitle, heard);
 					heard[s.songID].push(s.friendID);
 				}
 				seen.push(s.songID);
 			} else {
-				console.log('Ignoring duplicate post ' + s.songID);
+				console.log('Ignoring duplicate post ' + s.songID, seen);
 			}
 		});
 
