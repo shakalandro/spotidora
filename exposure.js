@@ -11,12 +11,10 @@ jQuery(function($) {
 	var DEBUG = true;
 
 	var SPOTIFY_APP_NAME = 'Exposure';
-	// The number of song posts to read from FB
-	var TOTAL_SONG_POSTS = DEBUG ? 10 : 100;
 	// The number of unique songs to read from FB posts
 	var TOTAL_NUM_SONGS = DEBUG ? 10 : 50;
 	// The number of songs to parse from a given FB friend
-	var SONGS_PER_PERSON = 8;
+	var SONGS_PER_PERSON = 4;
 	// The rate in milliseconds that we make api requests
 	var SONG_RATE = 100;
 
@@ -26,24 +24,30 @@ jQuery(function($) {
 	var auth = sp.require('sp://import/scripts/api/auth');
 	var views = sp.require('sp://import/scripts/api/views');
 
+	// facebook access token and access token expiration date
 	var fbAccess;
+	var fbAccessTtl;
+
+	// the spotify player model object and the spotify playlist instance
 	var player = models.player;
 	var playlistModel;
 
+	// exposure specific metadata about songs in playlist
 	var songList = [];
 	var sortStyle;
 
+	// temp data for remembering which songs have been heard and which posts have been seen
+	var seen;
+	var heard;
+
 	$('#throbber').hide();
 	$('#trackInfo').hide();
-	localStorage.clear();
 
-	if (!localStorage.heard) {
-		localStorage.heard = JSON.stringify({});
-	}
-	if (!localStorage.seen) {
-		localStorage.seen = JSON.stringify([]);
+	if (DEBUG) {
+		localStorage.clear();
 	}
 
+	// Initialize the playlist when the go or refresh buttons are clicked
 	$('#goButton, #refresh').click(function() {
 		playlistModel = new models.Playlist();
 		var playlistView = new views.List(playlistModel, function(track) {
@@ -82,6 +86,7 @@ jQuery(function($) {
 			return trackView;
 		});
 
+		// creating the column headers ui
 		var columnHeaderData = [
 			{'className': 'star', 'text': ''},
 			{'className': 'share', 'text': ''},
@@ -112,10 +117,11 @@ jQuery(function($) {
 			.append(headersList)
 			.append(playlistView.node);
 
+		seen = localStorageGetJSON('seen');
+		heard = localStorageGetJSON('heard');
         $('#instructions').hide();
         $('#throbber').show();
         $('header').removeClass('startHeader');
-        $('#playList').removeClass('hidden');
         $('#throbber span').text('Authenticating');
         $(this).addClass('small');
 		authenticate();
@@ -131,6 +137,7 @@ jQuery(function($) {
 		sortStyle = parseInt($(this).text());
 	});
 
+	// Add album widget when a new song is started
 	player.observe(models.EVENT.CHANGE, function(e) {
 		console.log('Player Event:', e);
 		$('#trackInfo').show();
@@ -174,25 +181,32 @@ jQuery(function($) {
 					.appendTo(positioningWrapper);
 
 			$('#trackInfo').prepend(overallWrapper);
-			overallWrapper.show('slow');
+			overallWrapper.fadeIn('slow');
 		}
 	});
 
+	// Login with facebook if we need to
 	function authenticate() {
-		auth.authenticateWithFacebook('345161178882446',
-				['friends_status', 'friends_actions.music'], {
-			onSuccess : function(accessToken, ttl) {
-				console.log("Authentication Success! Here's the access token: ", accessToken);
-				fbAccess = accessToken;
-				getFriendsData();
-			}, onFailure : function(error) {
-				console.log("Authentication failed with error: " + error);
-			}, onComplete : function() {
-				console.log("Authentication finished");
-			}
-		});
+		if (!fbAccess|| fbAccessTtl < (new Date())) {
+			auth.authenticateWithFacebook('345161178882446',
+					['friends_status', 'friends_actions.music'], {
+				onSuccess : function(accessToken, ttl) {
+					console.log("Authentication Success! Here's the access token: ", accessToken);
+					fbAccess = accessToken;
+					fbAccessTtl = ttl;
+					getFriendsData();
+				}, onFailure : function(error) {
+					console.log("Authentication failed with error: " + error);
+				}, onComplete : function() {
+					console.log("Authentication finished");
+				}
+			});
+		} else {
+			getFriendsData();
+		}
 	}
 
+	// get the list of facebook friends
 	function getFriendsData() {
 		$('#throbber span').text('Creeping On You');
 		makeFBAjaxCall("https://graph.facebook.com/me/friends",
@@ -205,25 +219,37 @@ jQuery(function($) {
 		);
 	}
 
+	// run through each friend in turn gathering the 'listens' posts and adding them to the list
 	function getMusicPosts(friends) {
 		setTimeout(function() {
 			getPostsFromFriend(friends, 0, 0);
 		}, SONG_RATE);
 	}
 
+	// gets 'listens' posts for a particular friend and adds them to the list
+	// if they meet the current filter criteria
+	// TODO: don't ignore 'listens' paging
 	function getPostsFromFriend(friends, i, songsFound) {
-		if (i < friends.length && songsFound <= TOTAL_SONG_POSTS) {
+		if (i < friends.length && songsFound <= TOTAL_NUM_SONGS) {
 			makeFBAjaxCall("https://graph.facebook.com/" + friends[i].id + "/music.listens",
 				function(data, paging) {
-					$('#throbber span').text(
-						'Stalking Friends (' +
-						parseInt((songsFound / TOTAL_SONG_POSTS) * 100) +
-						'%)'
-					);
-					if (data.length) {
-						var index = Math.min(SONGS_PER_PERSON, data.length);
-						songsFound += index;
-						parseSongPosts(data.slice(0, index - 1));
+					var index = 0;
+					while (index < data.length) {
+						var songData = parseSongPost(data[index]);
+						if (!filterSong(songData)) {
+							songsFound += index;
+							$('#throbber span').text(
+								'Stalking Friends (' +
+								parseInt((songsFound / TOTAL_NUM_SONGS) * 100) +
+								'%)'
+							);
+							songList.push(songData);
+						}
+						if (moveOn(index, friends[i])) {
+							break;
+						} else {
+							index++;
+						}
 					}
 					setTimeout(function() {
 						getPostsFromFriend(friends, i + 1, songsFound);
@@ -233,59 +259,50 @@ jQuery(function($) {
 				}
 			);
 		} else {
-			filterSongPosts();
+			displaySongs();
 		}
 	}
 
-	function parseSongPosts(songs) {
-		$.each(songs, function(idx, s) {
-			try {
-				songList.push({
-					ts: new Date(s.publish_time),
-					friendName: s.from.name,
-					friendID: s.from.id,
-					friendPic: 'https://graph.facebook.com/' + s.from.id + '/picture',
-					songID: s.data.song.id,
-					songTitle: s.data.song.title
-				});
-			} catch(e) {
-				console.log('Problem parsing song post', e, s, songList);
-			}
-		});
+	// returns an exposure metadata object given a facebook 'listens' post object
+	// returns null if anything goes wrong
+	function parseSongPost(songPost) {
+		try {
+			return {
+				ts: new Date(songPost.publish_time),
+				friendName: songPost.from.name,
+				friendID: songPost.from.id,
+				friendPic: 'https://graph.facebook.com/' + songPost.from.id + '/picture',
+				songID: songPost.data.song.id,
+				songTitle: songPost.data.song.title
+			};
+		} catch(e) {
+			console.log('Problem parsing song post', e, songPost, songList);
+			return null;
+		}
 	}
 
-	// Parses all of the FB posts and filters out duplicate songs and songs that have already been heard.
-	function filterSongPosts() {
-		$('#throbber span').text('Filtering');
-		var seen = localStorageGetJSON('seen');
-		var heard = localStorageGetJSON('heard');
+	// returns whether the search for songs should move on to the next friend
+	// or continue with the current friend
+	function moveOn(idx, friend) {
+		return idx >= SONGS_PER_PERSON;
+	}
 
-		var songs = [];
-		$.each(songList, function(idx, s) {
-			if (seen.indexOf(s.songID) == -1) {
-				if (!heard[s.songID]) {
-					songs.push(s);
-					heard[s.songID] = [s.friendID];
-				} else {
-					console.log('Ignoring duplicate song (' + s.songID + '): ' + s.songTitle, heard);
-					heard[s.songID].push(s.friendID);
-				}
-				seen.push(s.songID);
+	// returns false if the given song should be added from the list
+	// returns true if the given song should be filtered from the list
+	function filterSong(songData) {
+		if (!seen[songData.songID]) {
+			if (!heard[songData.songID]) {
+				heard[songData.songID] = [songData.friendID];
+				return false;
 			} else {
-				console.log('Ignoring duplicate post ' + s.songID, seen);
+				console.log('Filtered duplicate song:', songData, heard);
+				heard[songData.songID].push(songData.friendID);
 			}
-		});
-
-		songList = songs.slice(0, TOTAL_NUM_SONGS);
-		songList.shuffle();
-
-		console.log('Number of accepted songs ' + songList.length);
-		//sortBy(songList, 'ts');
-
-		displaySongs();
-
-		localStorageSetJSON('heard', heard);
-		localStorageSetJSON('seen', seen);
+			seen.push(songData.songID);
+		} else {
+			console.log('Filtered duplicate facebook post:', songData, seen);
+		}
+		return true;
 	}
 
 	function getTimeString(diffmillis) {
@@ -329,6 +346,8 @@ jQuery(function($) {
 		} else {
 			$('#throbber').hide();
 			$('#throbber span').empty();
+			localStorageSetJSON('heard', heard);
+			localStorageSetJSON('seen', seen);
 		}
 	}
 

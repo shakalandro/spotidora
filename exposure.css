@@ -224,7 +224,7 @@ header.startHeader {
 	margin-bottom: 0;
 	padding-bottom: 0;
 }
-header.startHeader h1{margin-top: 50px;}
+header.startHeader h1 {margin-top: 50px;}
 header.startHeader #goButton {margin-top: 20px;}
 header.startHeader #trackInfo {display: none;}
 
