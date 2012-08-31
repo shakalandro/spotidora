@@ -1,4 +1,6 @@
 Features:
+	[ ] Handle facebook login errors properly
+		https://developers.facebook.com/docs/authentication/access-token-expiration/
 	[ ] Checkbox option for removing duplicate songs
 		- could be session specific or logged in a db and flushed on a schedule
 	[ ] Checkbox option for appending to list or refreshing list,

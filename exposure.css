@@ -1,5 +1,5 @@
 @font-face {
-  font-family: Ranger ;
+  font-family: Ranger;
   src: url("Ranger/Ranger.ttf") format("truetype");
 }
 
@@ -30,8 +30,9 @@ h1, h2, h3, h4, h5, h6 {
 
 header{
 	overflow: auto;
+	min-height: 90px;
 	background-color: #222222;
-	background-image: URL("cartographer.png");
+	background-image: url("cartographer.png");
 	border-bottom: 1px solid #666666;
 }
 
@@ -116,6 +117,10 @@ header{
 #sp-headers.sp-list .sp-item span {
 	border: 1px solid #555555;
 	border-collapse: collapse;
+}
+
+.sp-list .sp-track-field-heard {
+	width: 125px;
 }
 
 .friendPic {

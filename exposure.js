@@ -34,6 +34,7 @@ jQuery(function($) {
 	var sortStyle;
 
 	$('#throbber').hide();
+	$('#trackInfo').hide();
 	localStorage.clear();
 
 	if (!localStorage.heard) {
@@ -58,6 +59,7 @@ jQuery(function($) {
 			var heardTime = document.createTextNode(getTimeString((new Date()).diff(exposureData.ts)));
 
 			var heardSpan = document.createElement('span');
+			heardSpan.className = 'sp-track-field-heard';
 			heardSpan.appendChild(heardTime);
 
 			trackView.node.insertBefore(heardSpan, trackView.node.lastChild);
@@ -71,6 +73,7 @@ jQuery(function($) {
 			friendImg.alt = 'facebook profile picture of ' + exposureData.friendName;
 
 			var friendSpan = document.createElement('span');
+			friendSpan.className = 'sp-track-field-friend';
 			friendSpan.appendChild(friendImg);
 			friendSpan.appendChild(friend);
 
@@ -118,13 +121,6 @@ jQuery(function($) {
 		authenticate();
 	});
 
-	$('.albumWrapper').hover(function() {
-		alert("yes");
-		$(this).find('.contentWrapper').removeClass('invisible');
-	}, function() {
-		alert("yes2");
-		$(this).find('.contentWrapper').addClass('invisible');
-	});
 
 	// Set default sort style
 	$('#sortStyles div:last-child').addClass('chosen');
@@ -137,11 +133,12 @@ jQuery(function($) {
 
 	player.observe(models.EVENT.CHANGE, function(e) {
 		console.log('Player Event:', e);
+		$('#trackInfo').show();
 		if (player.track != null) {
 			var exposureData = findBy(songList, 'uri', player.track.data.uri);
 			console.log(player.track, exposureData);
 
-			var overallWrapper = $('<div>');
+			var overallWrapper = $('<div>').hide();
 
 			var positioningWrapper = $('<div>')
 				.addClass('albumWrapper')
@@ -150,6 +147,11 @@ jQuery(function($) {
 					'src': player.track.data.album.cover,
 					'alt': 'album art'
 				}))
+				.hover(function() {
+					$(this).find('.contentWrapper').removeClass('invisible');
+				}, function() {
+					$(this).find('.contentWrapper').addClass('invisible');
+				})
 				.appendTo(overallWrapper);
 
 			var profilePicDiv = $('<div>')
@@ -164,7 +166,7 @@ jQuery(function($) {
 
 			var contentWrapper = $('<div>')
 					.addClass('contentWrapper')
-					.addClass('invisible')
+					.toggleClass('invisible', 3000)
 					.append(profilePicDiv)
 					.append($('<h3>').text(exposureData.friendName))
 					.append($('<h2>').text(player.track.data.name))
@@ -172,6 +174,7 @@ jQuery(function($) {
 					.appendTo(positioningWrapper);
 
 			$('#trackInfo').prepend(overallWrapper);
+			overallWrapper.show('slow');
 		}
 	});
 
@@ -179,7 +182,7 @@ jQuery(function($) {
 		auth.authenticateWithFacebook('345161178882446',
 				['friends_status', 'friends_actions.music'], {
 			onSuccess : function(accessToken, ttl) {
-				console.log("Authentication Success! Here's the access token: " + accessToken);
+				console.log("Authentication Success! Here's the access token: ", accessToken);
 				fbAccess = accessToken;
 				getFriendsData();
 			}, onFailure : function(error) {
