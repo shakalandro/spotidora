@@ -178,6 +178,7 @@ header{
 	position: relative;
 	overflow: hidden;
 	height: 300px;
+	background-image: URL("album.png"); 
 }
 
 #trackInfo .albumArt {
