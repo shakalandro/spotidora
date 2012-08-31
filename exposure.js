@@ -148,9 +148,9 @@ jQuery(function($) {
 					'alt': 'album art'
 				}))
 				.hover(function() {
-					$(this).find('.contentWrapper').removeClass('invisible');
+					$(this).find('.contentWrapper').toggleClass('invisible');
 				}, function() {
-					$(this).find('.contentWrapper').addClass('invisible');
+					$(this).find('.contentWrapper').toggleClass('invisible');
 				})
 				.appendTo(overallWrapper);
 
