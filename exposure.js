@@ -73,11 +73,20 @@ jQuery(function($) {
 			});
 			$('#playlist').append(playlistView.node);
 		}
+
         $('#instructions').hide();
         $('#throbber').show();
+        $('header').removeClass('startHeader');
+        $('#content').show();
         $('#throbber span').text('Authenticating');
         $(this).addClass('small');
 		authenticate();
+	});
+
+	$('.album').hover(function() {
+		$(this).find('.albumInfo').removeClass('invisible');
+	}, function() {
+		$(this).find('.albumInfo').addClass('invisible');
 	});
 
 	// Set default sort style
@@ -149,7 +158,7 @@ var profilePicDiv = $('<div>')
 			console.log(contentWrapper);
 			$('#trackInfo').prepend(overallWrapper);
 		} else {
-			$('#trackInfo').empty();
+			$('#albumImage').empty();
 		}
 	});
 

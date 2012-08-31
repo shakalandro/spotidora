@@ -1,14 +1,36 @@
+@font-face {  
+  font-family: Ranger ;  
+  src: url("Ranger/Ranger.ttf") format("truetype");  
+} 
+
 body {
 	font-family: 'Helvetica', 'Lucida Sans', 'Sans-Serif';
+	width: 100%;
+	height: 100%;
 }
 
 h1 {
 	font-weight: normal;
-	font-size: 52px;
+	font-size: 74px;
 	line-height: 1em;
 	text-align: center;
-	color: #CCCCCC;
+	color: #FFCC11;
+	font-family: 'Ranger';
+	text-shadow: 1px 2px 5px #000000;
+}
+
+#x {
+	color: #FFFFDD;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	line-height: 1em;
+}
+
+header{
+	overflow: auto;
 	background-color: #222222;
+	background-image: URL("cartographer.png");
 	padding: 4px;
 	border-bottom: 1px solid #666666;
 }
@@ -89,10 +111,10 @@ h1 {
 	width: 30px;
 	height: 24px;
 	margin-right: 5px;
-	margin-top: 12px;
+	margin-top: 8px;
 	padding-top: 6px;
-	border: 3px solid black;
-	border-radius: 10px;
+	box-shadow: 0 0 5px #000000;
+	border-radius: 5px;
 	text-align: center;
 	font-size: 15pt;
 	color: white;
@@ -101,6 +123,9 @@ h1 {
 
 #sortStyles div:hover {
 	background-color: #666666;
+	border-bottom: 2px solid #CCCCCC;
+	position: relative;
+	top: -2px;
 }
 
 #sortStyles div:first-child {
@@ -109,6 +134,9 @@ h1 {
 
 #sortStyles div.chosen {
 	background-color: grey;
+	border-bottom: 2px solid #CCCCCC;
+	position: relative;
+	top: -2px;
 }
 
 #trackInfo {
@@ -152,3 +180,121 @@ h1 {
 div.sp-list {
 	max-height: none;
 }
+
+
+
+/*========================*/
+
+#playListWrapper {
+	width:100%;
+	margin-left: auto;
+	margin-right: auto;
+	/*border: 1px solid #666666;*/
+	border-top: 0;
+}
+
+footer {
+	position: fixed;
+	height: 50px;
+	width: 100%;
+	background-color: #171717;
+	bottom: 0px;
+	-webkit-box-shadow: inset 0px 10px 20px #000;
+}
+
+header.startHeader {
+	height: 95%;
+	border: 0;
+	margin-bottom: 0;
+	padding-bottom: 0;
+}
+header.startHeader h1{margin-top: 50px;}
+header.startHeader #goButton {margin-top: 20px;}
+header.startHeader #albumsWrapper {display: none;}
+
+#refresh {
+	float: left;
+	margin: 5px;
+}
+#refresh:hover {
+	cursor:pointer;
+}
+
+/*=========Testing new header begins=========*/
+
+#albumsWrapper {
+	overflow-x: scroll;
+}
+
+#albums {
+	height: 308px;
+	width: 9999px;
+	overflow: hidden;
+}
+
+.album {
+	width: 300px;
+	height: 300px;
+	float: left;
+	clear: right;
+	position: relative;
+	overflow: hidden;
+}
+
+#album1{background-image: URL("album1.jpg");}
+#album2{background-image: URL("album2.jpg");}
+#album3{background-image: URL("album3.jpg");}
+#album4{background-image: URL("album4.jpg");}
+
+
+
+.albumInfo {
+	background-color: rgba(0,0,0,.5);
+	overflow: auto;
+	width: 100%;
+	/*-webkit-transition: opacity .5s;*/
+	-webkit-transition: bottom .5s;
+	position: absolute;
+	bottom: 0px;
+}
+
+.friendFace {
+	width: 100px;
+	height: 100px;
+	float: left;
+	margin-right: 5px;
+}
+
+.friendName, .songName {display: block;}
+
+.friendName {
+	margin-top: 10px;
+	font-size: 12pt;
+	color: #FFFFFF;
+}
+
+.songName {
+	font-size: 18pt;
+	color: #FFCC11;
+}
+
+.smallText { 
+	font-style: italic;
+	font-size: 10pt;
+	color: #AAAAAA;
+	font-weight: normal;
+}
+.artist {
+	color: #AAAAAA;
+	font-size: 14pt;
+	display: block;
+	font-weight: normal;
+}
+
+.invisible {
+	/*opacity: 0;*/
+	bottom: -100px;
+}
+
+/*=========Testing new header ends=========*/
+
