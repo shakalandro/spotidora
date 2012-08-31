@@ -77,16 +77,18 @@ jQuery(function($) {
         $('#instructions').hide();
         $('#throbber').show();
         $('header').removeClass('startHeader');
-        $('#content').show();
+        $('#playList').removeClass('hidden');
         $('#throbber span').text('Authenticating');
         $(this).addClass('small');
 		authenticate();
 	});
 
-	$('.album').hover(function() {
-		$(this).find('.albumInfo').removeClass('invisible');
+	$('.albumWrapper').hover(function() {
+		alert("yes");
+		$(this).find('.contentWrapper').removeClass('invisible');
 	}, function() {
-		$(this).find('.albumInfo').addClass('invisible');
+		alert("yes2");
+		$(this).find('.contentWrapper').addClass('invisible');
 	});
 
 	// Set default sort style
@@ -126,9 +128,10 @@ jQuery(function($) {
 
 			var contentWrapper = $('<div>')
 					.addClass('contentWrapper')
+					.addClass('invisible')
 					.append(profilePicDiv)
-					.append($('<h3>').text(exposureData.friendName + ' listened to'))
-					.append($('<h2>').text(player.track.data.name + ' by'))
+					.append($('<h3>').text(exposureData.friendName))
+					.append($('<h2>').text(player.track.data.name))
 					.append($('<h3>').text(player.track.data.artists[0].name))
 					.appendTo(positioningWrapper);
 

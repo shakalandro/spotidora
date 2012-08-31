@@ -31,7 +31,6 @@ header{
 	overflow: auto;
 	background-color: #222222;
 	background-image: URL("cartographer.png");
-	padding: 4px;
 	border-bottom: 1px solid #666666;
 }
 
@@ -96,10 +95,6 @@ header{
 	line-height: 1em;
 }
 
-#playlist {
-	height: 100%;
-}
-
 .friendPic {
 	height: 20px;
 	vertical-align: bottom;
@@ -151,8 +146,10 @@ header{
 	display: inline-block;
 }
 
-#trackInfo .albumWrapper {
+.albumWrapper {
 	position: relative;
+	overflow: hidden;
+	height: 300px;
 }
 
 #trackInfo .albumArt {
@@ -165,11 +162,10 @@ header{
 	height: 100px;
 	width: 100px;
 	overflow: hidden;
-	position: absolute;
 	top: 190px;
 	left: 0px;
-	border: 5px solid grey;
-	border-radius: 5px;
+	/*border: 5px solid grey;
+	border-radius: 5px;*/
 }
 
 #trackInfo .albumFriendPic {
@@ -181,16 +177,8 @@ div.sp-list {
 	max-height: none;
 }
 
-
-
-/*========================*/
-
-#playListWrapper {
-	width:100%;
-	margin-left: auto;
-	margin-right: auto;
-	/*border: 1px solid #666666;*/
-	border-top: 0;
+#playList {
+	display: none;
 }
 
 footer {
@@ -210,7 +198,7 @@ header.startHeader {
 }
 header.startHeader h1{margin-top: 50px;}
 header.startHeader #goButton {margin-top: 20px;}
-header.startHeader #albumsWrapper {display: none;}
+header.startHeader #trackInfo {display: none;}
 
 #refresh {
 	float: left;
@@ -220,61 +208,46 @@ header.startHeader #albumsWrapper {display: none;}
 	cursor:pointer;
 }
 
-/*=========Testing new header begins=========*/
 
-#albumsWrapper {
+#trackInfo {
 	overflow-x: scroll;
 }
 
-#albums {
-	height: 308px;
-	width: 9999px;
-	overflow: hidden;
-}
-
-.album {
+/*.albumWrapper > div {
 	width: 300px;
 	height: 300px;
 	float: left;
 	clear: right;
 	position: relative;
 	overflow: hidden;
-}
+}*/
 
-#album1{background-image: URL("album1.jpg");}
-#album2{background-image: URL("album2.jpg");}
-#album3{background-image: URL("album3.jpg");}
-#album4{background-image: URL("album4.jpg");}
-
-
-
-.albumInfo {
+.contentWrapper {
 	background-color: rgba(0,0,0,.5);
-	overflow: auto;
+	overflow: hidden;
 	width: 100%;
-	/*-webkit-transition: opacity .5s;*/
 	-webkit-transition: bottom .5s;
 	position: absolute;
 	bottom: 0px;
 }
 
-.friendFace {
+.profilePicWrapper {
 	width: 100px;
 	height: 100px;
 	float: left;
 	margin-right: 5px;
 }
 
-.friendName, .songName {display: block;}
+.contentWrapper h2, .contentWrapper h3 {display: block;}
 
-.friendName {
+.contentWrapper h3:nth-child(2) {
 	margin-top: 10px;
-	font-size: 12pt;
+	font-size: 10pt;
 	color: #FFFFFF;
 }
 
-.songName {
-	font-size: 18pt;
+.contentWrapper h2 {
+	font-size: 14pt;
 	color: #FFCC11;
 }
 
@@ -284,17 +257,13 @@ header.startHeader #albumsWrapper {display: none;}
 	color: #AAAAAA;
 	font-weight: normal;
 }
-.artist {
+.contentWrapper h3:nth-child(4) {
 	color: #AAAAAA;
-	font-size: 14pt;
+	font-size: 9pt;
 	display: block;
 	font-weight: normal;
 }
 
 .invisible {
-	/*opacity: 0;*/
 	bottom: -100px;
 }
-
-/*=========Testing new header ends=========*/
-
