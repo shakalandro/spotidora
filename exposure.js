@@ -131,61 +131,53 @@ jQuery(function($) {
 		authenticate();
 	});
 
-
-	// Set default sort style
-	$('#sortStyles div:last-child').addClass('chosen');
-	sortStyle = 1;
-	$('#sortStyles div').click(function() {
-		$('#sortStyles div').removeClass('chosen');
-		$(this).addClass('chosen');
-		sortStyle = parseInt($(this).text());
-	});
-
 	// Add album widget when a new song is started
 	player.observe(models.EVENT.CHANGE, function(e) {
-		console.log('Player Event:', e);
-		$('#trackInfo').show();
-		if (player.track != null) {
-			var exposureData = findBy(songList, 'uri', player.track.data.uri);
-			console.log(player.track, exposureData);
+		if (e.data.playstate && e.data.curtrack) {
+			console.log('Player Event:', e, player);
+			$('#trackInfo').show();
+			if (player.track != null) {
+				var exposureData = findBy(songList, 'uri', player.track.data.uri);
+				console.log(player.track, exposureData);
 
-			var overallWrapper = $('<div>').hide();
+				var overallWrapper = $('<div>').hide();
 
-			var positioningWrapper = $('<div>')
-				.addClass('albumWrapper')
-				.append($('<img>', {
-					'class': 'albumArt',
-					'src': player.track.data.album.cover,
-					'alt': 'album art'
-				}))
-				.hover(function() {
-					$(this).find('.contentWrapper').toggleClass('invisible');
-				}, function() {
-					$(this).find('.contentWrapper').toggleClass('invisible');
-				})
-				.appendTo(overallWrapper);
-
-			var profilePicDiv = $('<div>')
-				.addClass('profilePicWrapper')
-				.append(
-					$('<img>', {
-						'src': exposureData.friendPic + '?type=normal',
-						'class': 'albumFriendPic',
-						'alt': 'fb profile pic'
+				var positioningWrapper = $('<div>')
+					.addClass('albumWrapper')
+					.append($('<img>', {
+						'class': 'albumArt',
+						'src': player.track.data.album.cover,
+						'alt': 'album art'
+					}))
+					.hover(function() {
+						$(this).find('.contentWrapper').toggleClass('invisible');
+					}, function() {
+						$(this).find('.contentWrapper').toggleClass('invisible');
 					})
-				);
+					.appendTo(overallWrapper);
 
-			var contentWrapper = $('<div>')
-					.addClass('contentWrapper')
-					.toggleClass('invisible', 3000)
-					.append(profilePicDiv)
-					.append($('<h3>').text(exposureData.friendName))
-					.append($('<h2>').text(player.track.data.name))
-					.append($('<h3>').text(player.track.data.artists[0].name))
-					.appendTo(positioningWrapper);
+				var profilePicDiv = $('<div>')
+					.addClass('profilePicWrapper')
+					.append(
+						$('<img>', {
+							'src': exposureData.friendPic + '?type=normal',
+							'class': 'albumFriendPic',
+							'alt': 'fb profile pic'
+						})
+					);
 
-			$('#trackInfo').prepend(overallWrapper);
-			overallWrapper.fadeIn('slow');
+				var contentWrapper = $('<div>')
+						.addClass('contentWrapper')
+						.toggleClass('invisible', 3000)
+						.append(profilePicDiv)
+						.append($('<h3>').text(exposureData.friendName))
+						.append($('<h2>').text(player.track.data.name))
+						.append($('<h3>').text(player.track.data.artists[0].name))
+						.appendTo(positioningWrapper);
+
+				$('#trackInfo').prepend(overallWrapper);
+				overallWrapper.fadeIn('slow');
+			}
 		}
 	});
 
