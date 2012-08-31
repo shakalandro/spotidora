@@ -11,12 +11,13 @@ jQuery(function($) {
 	var DEBUG = true;
 
 	var SPOTIFY_APP_NAME = 'Exposure';
-	// The number of unique songs to read from FB posts
-	var TOTAL_NUM_SONGS = DEBUG ? 10 : 50;
-	// The number of songs to parse from a given FB friend
-	var SONGS_PER_PERSON = 4;
 	// The rate in milliseconds that we make api requests
 	var SONG_RATE = 100;
+
+	// The number of unique songs to read from FB posts
+	var totalNumSongs = DEBUG ? 10 : 50;
+	// The number of songs to parse from a given FB friend
+	var songsPerFriend = 4;
 
 	// Spotify API objects
 	var sp = getSpotifyApi(1);
@@ -119,6 +120,9 @@ jQuery(function($) {
 
 		seen = localStorageGetJSON('seen');
 		heard = localStorageGetJSON('heard');
+		songsPerFriend = parseInt($('#songsPerFriend input').val());
+		totalNumSongs = parseInt($('#totalSongs input').val());
+		console.log(songsPerFriend, totalNumSongs);
         $('#instructions').hide();
         $('#throbber').show();
         $('header').removeClass('startHeader');
@@ -230,22 +234,22 @@ jQuery(function($) {
 	// if they meet the current filter criteria
 	// TODO: don't ignore 'listens' paging
 	function getPostsFromFriend(friends, i, songsFound) {
-		if (i < friends.length && songsFound <= TOTAL_NUM_SONGS) {
+		if (i < friends.length && songsFound <= totalNumSongs) {
 			makeFBAjaxCall("https://graph.facebook.com/" + friends[i].id + "/music.listens",
 				function(data, paging) {
 					var index = 0;
 					while (index < data.length) {
 						var songData = parseSongPost(data[index]);
 						if (!filterSong(songData)) {
-							songsFound += index;
+							songsFound++;
 							$('#throbber span').text(
 								'Stalking Friends (' +
-								parseInt((songsFound / TOTAL_NUM_SONGS) * 100) +
+								parseInt((songsFound / totalNumSongs) * 100) +
 								'%)'
 							);
 							songList.push(songData);
 						}
-						if (moveOn(index, friends[i])) {
+						if (moveOn(index, friends[i], songsFound)) {
 							break;
 						} else {
 							index++;
@@ -283,8 +287,8 @@ jQuery(function($) {
 
 	// returns whether the search for songs should move on to the next friend
 	// or continue with the current friend
-	function moveOn(idx, friend) {
-		return idx >= SONGS_PER_PERSON;
+	function moveOn(idx, friend, songsFound) {
+		return idx + 1 >= songsPerFriend || songsFound + 1 >= totalNumSongs;
 	}
 
 	// returns false if the given song should be added from the list
@@ -320,6 +324,8 @@ jQuery(function($) {
 	}
 
 	function displaySongs() {
+		console.log('songList:', songList);
+		songList.shuffle();
 		getSpotifySongs(0);
 	}
 

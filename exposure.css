@@ -129,37 +129,10 @@ header{
 	margin-right: 10px;
 }
 
-#sortStyles div {
+#songsPerFriend, #totalSongs {
 	float: right;
-	width: 30px;
-	height: 24px;
-	margin-right: 5px;
-	margin-top: 8px;
-	padding-top: 6px;
-	box-shadow: 0 0 5px #000000;
-	border-radius: 5px;
-	text-align: center;
-	font-size: 15pt;
 	color: white;
-	background-color: #333333;
-}
-
-#sortStyles div:hover {
-	background-color: #666666;
-	border-bottom: 2px solid #CCCCCC;
-	position: relative;
-	top: -2px;
-}
-
-#sortStyles div:first-child {
-	margin-right: 10px;
-}
-
-#sortStyles div.chosen {
-	background-color: grey;
-	border-bottom: 2px solid #CCCCCC;
-	position: relative;
-	top: -2px;
+	margin: 10px;
 }
 
 #trackInfo {
@@ -178,7 +151,7 @@ header{
 	position: relative;
 	overflow: hidden;
 	height: 300px;
-	background-image: URL("album.png"); 
+	background-image: URL("album.png");
 }
 
 #trackInfo .albumArt {
@@ -231,7 +204,8 @@ header.startHeader #trackInfo {display: none;}
 
 #refresh {
 	float: left;
-	margin: 5px;
+	margin: 10px;
+	height: 30px;
 }
 #refresh:hover {
 	cursor:pointer;
