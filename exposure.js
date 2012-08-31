@@ -8,7 +8,7 @@ jQuery(function($) {
 
 	var SPOTIFY_APP_NAME = 'Exposure';
 	// The number of song posts to read from FB
-	var TOTAL_SONG_POSTS = DEBUG ? 50 : 100;
+	var TOTAL_SONG_POSTS = DEBUG ? 20 : 100;
 	// The number of unique songs to read from FB posts
 	var TOTAL_NUM_SONGS = DEBUG ? 10 : 50;
 	// The number of songs to parse from a given FB friend
@@ -38,9 +38,23 @@ jQuery(function($) {
 		localStorage.seen = JSON.stringify([]);
 	}
 
+	/*GABE'S TESTING:*/
+
+	$('.album').mouseover(function() {
+		$(this).find('.albumInfo').removeClass('invisible');
+	});
+
+	$('.album').mouseout(function() {
+		$(this).find('.albumInfo').addClass('invisible');
+	});
+
+	/*END */
+
 	$('#goButton').click(function() {
         $('#instructions').hide();
         $('#throbber').show();
+        $('header').removeClass('startHeader');
+        $('#content').show();
         $('#throbber span').text('Authenticating');
 		$(this).addClass('small');
 		authenticate();
@@ -58,9 +72,9 @@ jQuery(function($) {
 	player.observe(models.EVENT.CHANGE, function(e) {
 		if (player.track != null) {
 			console.log(player.track);
-			$('#trackInfo').append($('<img>').attr('src', player.track.data.album.cover));
+			$('#albumImage').append($('<img>').attr('src', player.track.data.album.cover));
 		} else {
-			$('#trackInfo').empty();
+			$('#albumImage').empty();
 		}
 	});
 

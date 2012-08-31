@@ -10,35 +10,38 @@
 	</head>
 	<body>
 		<header class="startHeader">
-			<h1>Exposure</h1>
+			<img src="refresh.png" id="refresh" />
+			<h1>E<span id="x">x</span>posure</h1>
 			<div id="goButton" class="clickable"></div>
 			<p id="instructions">Find out what your friends are listening to.</p>
 			<div id="throbber">
 				<img src="throbber.gif" alt="throbber" />
 				<span></span>
 			</div>
-			<div id="nowPlaying">
-				<div id="squareWrapper">
-					<div class="square" id="friendImage"></div>
-					<div class="square square2" id="albumImage"></div>
+			<div id="albumsWrapper">
+				<div id="albums">
+					<div id="album1" class="album"/>
+						<div class="albumInfo invisible">
+							<img src="roy.jpg" class="friendFace" />
+							<h3 class="friendName">Roy McElmurray<span class="smallText">listened to</span></h3>
+							<h2 class="songName">Hello Seattle<span class="smallText"> by</span></h2>
+							<h3 class="artist">Owl City</span>
+						</div>
+					</div>
+					<div id="album2" class="album"/>
+						<div class="albumInfo invisible">
+							<img src="roy.jpg" class="friendFace" />
+							<h3 class="friendName">Roy McElmurray<span class="smallText"> listened to</span></h3>
+							<h2 class="songName">Hello Seattle<span class="smallText"> by</span></h2>
+							<h3 class="artist">Owl City</span>
+						</div>
+					</div>
+					<div id="album3" class="album"/></div>
+					<div id="album4" class="album"/></div>
 				</div>
-				<div id="options">
-					<h3>Sort By</h3>
-					<ul>
-						<li>Most Recent</li>
-						<li>Genre</li>
-						<li>Popularity</li>
-						<li>Friend</li>
-					</ul>
-				</div>
-				<h3 id="friendName">Roy McElmurray<span id="listenedTo">listened to</span></h3>
-				<h2 id="songName">Hello Seattle</h2>
-				<span id="artist">Owl City</span>
-				
-				<div id="trackInfo"></div>
 			</div>
 		</header>
-		<div id="content" class="noHeight">
+		<div id="content">
 			<div id="playListWrapper">
 				<div id="playlist"></div>
 			</div>
