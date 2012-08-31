@@ -1,6 +1,7 @@
 /*
 Exposure, a social music discovery Spotify app
-Authors: Roy McElmurry, Tyler Rigsby, Gabriel Groen, Ambar Choudhury
+Origanal Authors: Roy McElmurry, Tyler Rigsby, Gabriel Groen, Ambar Choudhury
+Major overhaul by Roy McElmurry and Gabriel Groen
 */
 
 jQuery(function($) {
@@ -8,13 +9,13 @@ jQuery(function($) {
 
 	var SPOTIFY_APP_NAME = 'Exposure';
 	// The number of song posts to read from FB
-	var TOTAL_SONG_POSTS = DEBUG ? 50 : 100;
+	var TOTAL_SONG_POSTS = DEBUG ? 10 : 100;
 	// The number of unique songs to read from FB posts
 	var TOTAL_NUM_SONGS = DEBUG ? 10 : 50;
 	// The number of songs to parse from a given FB friend
 	var SONGS_PER_PERSON = 8;
 	// The rate in milliseconds that we make api requests
-	var SONG_RATE = 50;
+	var SONG_RATE = 100;
 
 	// Spotify API objects
 	sp = getSpotifyApi(1);
@@ -26,6 +27,7 @@ jQuery(function($) {
 	var player = models.player;
 	var playlistModel;
 
+	var songList = [];
 	var sortStyle;
 
 	$('#throbber').hide();
@@ -38,11 +40,43 @@ jQuery(function($) {
 		localStorage.seen = JSON.stringify([]);
 	}
 
-	$('#goButton').click(function() {
+	$('#goButton, #refreshButton').click(function() {
+		if (!playlistModel) {
+			playlistModel = new models.Playlist();
+			var playlistView = new views.List(playlistModel, function(track) {
+				var exposureData = findBy(songList, 'uri', track.data.uri);
+				var trackView = new views.Track(track,
+						views.Track.FIELD.NAME |
+           				views.Track.FIELD.ARTIST |
+           				views.Track.FIELD.DURATION |
+           				views.Track.FIELD.ALBUM);
+
+				//inject name field
+				var name = document.createTextNode(
+					exposureData.friendName + ' (' +
+					getTimeString((new Date()).diff(exposureData.ts)) +
+					')'
+				);
+
+				//inject facebook profile pic
+				var img = document.createElement('img');
+				img.src = exposureData.friendPic;
+				img.className = 'friendPic';
+				img.alt = 'facebook profile picture of ' + exposureData.friendName;
+
+				var span = document.createElement('span');
+				span.appendChild(img);
+				span.appendChild(name);
+
+				trackView.node.insertBefore(span, trackView.node.firstChild);
+				return trackView;
+			});
+			$('#playlist').append(playlistView.node);
+		}
         $('#instructions').hide();
         $('#throbber').show();
         $('#throbber span').text('Authenticating');
-		$(this).addClass('small');
+        $(this).addClass('small');
 		authenticate();
 	});
 
@@ -55,10 +89,65 @@ jQuery(function($) {
 		sortStyle = parseInt($(this).text());
 	});
 
+	/*
+var profilePicDiv = $('<div>')
+					.append(
+						$('<div>')
+							.addClass('profilePicWrapper')
+							.append(
+								$('<img>', {
+									'src': exposureData.friendPic + '?type=normal',
+									'class': 'albumFriendPic'
+								})
+							)
+					)
+					.append($('<h3>').text(exposureData.friendName))
+					.append($('<h2>').text(track.data.name))
+					.append($('<h3>').text(track.data.artist));
+
+			$('<div>')
+				.append(
+					$('<div>')
+						.addClass('albumWrapper')
+						.css('background-image', player.track.data.album.cover)
+						.append(profilePicDiv)
+				).prependTo('#trackInfo');
+	*/
+
 	player.observe(models.EVENT.CHANGE, function(e) {
 		if (player.track != null) {
-			console.log(player.track);
-			$('#trackInfo').append($('<img>').attr('src', player.track.data.album.cover));
+			var exposureData = findBy(songList, 'uri', player.track.data.uri);
+			console.log(player.track, exposureData);
+
+			var overallWrapper = $('<div>');
+			console.log(overallWrapper);
+			var positioningWrapper = $('<div>')
+				.addClass('albumWrapper')
+				.append($('<img>', {
+					'class': 'albumArt',
+					'src': player.track.data.album.cover
+				}))
+				.appendTo(overallWrapper);
+			console.log(positioningWrapper);
+
+			var profilePicDiv = $('<div>')
+				.addClass('profilePicWrapper')
+				.append(
+					$('<img>', {
+						'src': exposureData.friendPic + '?type=normal',
+						'class': 'albumFriendPic'
+					})
+				);
+			console.log(profilePicDiv);
+			var contentWrapper = $('<div>')
+					.addClass('contentWrapper')
+					.append(profilePicDiv)
+					.append($('<h3>').text(exposureData.friendName + ' listened to'))
+					.append($('<h2>').text(player.track.data.name + ' by'))
+					.append($('<h3>').text(player.track.data.artists[0].name))
+					.appendTo(positioningWrapper);
+			console.log(contentWrapper);
+			$('#trackInfo').prepend(overallWrapper);
 		} else {
 			$('#trackInfo').empty();
 		}
@@ -80,7 +169,7 @@ jQuery(function($) {
 	}
 
 	function getFriendsData() {
-		$('#throbber span').text('Creeping');
+		$('#throbber span').text('Creeping On You');
 		makeFBAjaxCall("https://graph.facebook.com/me/friends",
 			function(myfriends) {
 				var friends = myfriends.shuffle();
@@ -93,11 +182,11 @@ jQuery(function($) {
 
 	function getMusicPosts(friends) {
 		setTimeout(function() {
-			getPostsFromFriend(friends, 0, 0, []);
+			getPostsFromFriend(friends, 0, 0);
 		}, SONG_RATE);
 	}
 
-	function getPostsFromFriend(friends, i, songsFound, songList) {
+	function getPostsFromFriend(friends, i, songsFound) {
 		if (i < friends.length && songsFound <= TOTAL_SONG_POSTS) {
 			makeFBAjaxCall("https://graph.facebook.com/" + friends[i].id + "/music.listens",
 				function(data, paging) {
@@ -109,27 +198,28 @@ jQuery(function($) {
 					if (data.length) {
 						var index = Math.min(SONGS_PER_PERSON, data.length);
 						songsFound += index;
-						parseSongPosts(data.slice(0, index - 1), songList);
+						parseSongPosts(data.slice(0, index - 1));
 					}
 					setTimeout(function() {
-						getPostsFromFriend(friends, i + 1, songsFound, songList);
+						getPostsFromFriend(friends, i + 1, songsFound);
 					}, SONG_RATE);
 				}, function() {
 					console.log("Could not get songs by friend failure");
 				}
 			);
 		} else {
-			filterSongPosts(songList);
+			filterSongPosts();
 		}
 	}
 
-	function parseSongPosts(songs, songList) {
+	function parseSongPosts(songs) {
 		$.each(songs, function(idx, s) {
 			try {
 				songList.push({
 					ts: new Date(s.publish_time),
 					friendName: s.from.name,
 					friendID: s.from.id,
+					friendPic: 'https://graph.facebook.com/' + s.from.id + '/picture',
 					songID: s.data.song.id,
 					songTitle: s.data.song.title
 				});
@@ -140,7 +230,7 @@ jQuery(function($) {
 	}
 
 	// Parses all of the FB posts and filters out duplicate songs and songs that have already been heard.
-	function filterSongPosts(songList) {
+	function filterSongPosts() {
 		$('#throbber span').text('Filtering');
 		var seen = localStorageGetJSON('seen');
 		var heard = localStorageGetJSON('heard');
@@ -155,19 +245,19 @@ jQuery(function($) {
 					console.log('Ignoring duplicate song (' + s.songID + '): ' + s.songTitle);
 					heard[s.songID].push(s.friendID);
 				}
-				seen.push(s['id']);
+				seen.push(s.songID);
 			} else {
-				console.log('Ignoring duplicate post ' + s['id']);
+				console.log('Ignoring duplicate post ' + s.songID);
 			}
 		});
 
-		songList = songs;
+		songList = songs.slice(0, TOTAL_NUM_SONGS);
+		songList.shuffle();
 
 		console.log('Number of accepted songs ' + songList.length);
 		//sortBy(songList, 'ts');
-		songList.shuffle();
 
-		displaySongs(songList.slice(TOTAL_NUM_SONGS));
+		displaySongs();
 
 		localStorageSetJSON('heard', heard);
 		localStorageSetJSON('seen', seen);
@@ -187,64 +277,28 @@ jQuery(function($) {
 		}
 	}
 
-	function displaySongs(songList) {
-		if (!playlistModel) {
-			playlistModel = new models.Playlist();
-			var playlistView = new views.List(playlistModel, function(track) {
-				var exposureData = findBy(songList, 'uri', track.data.uri);
-				var trackView = new views.Track(track,
-						views.Track.FIELD.NAME |
-           				views.Track.FIELD.ARTIST |
-           				views.Track.FIELD.DURATION |
-           				views.Track.FIELD.ALBUM);
-				if (exposureData.length) {
-					exposureData = exposureData[0];
-
-					//inject name field
-					var name = document.createTextNode(
-						exposureData.friendName + ' (' +
-						getTimeString((new Date()).diff(exposureData.ts)) +
-						')'
-					);
-
-					//inject facebook profile pic
-					var img = document.createElement('img');
-					img.src = 'https://graph.facebook.com/' + exposureData.friendID + '/picture';
-					img.className = 'friendPic';
-					img.alt = 'facebook profile picture of ' + exposureData.friendName;
-
-					var span = document.createElement('span');
-					span.appendChild(img);
-					span.appendChild(name);
-
-					trackView.node.insertBefore(span, trackView.node.firstChild);
-				}
-				return trackView;
-			});
-			$('#playlist').append(playlistView.node);
-		}
-
-		getSpotifySongs(0, songList);
+	function displaySongs() {
+		getSpotifySongs(0);
 	}
 
-	function getSpotifySongs(i, songs) {
-		if (i < songs.length) {
+	function getSpotifySongs(i) {
+		if (i < songList.length) {
 			$('#throbber span').text(
 				'Finding Songs (' +
-				parseInt((i / songs.length) * 100) +
+				parseInt((i / songList.length) * 100) +
 				'%)'
 			);
-			var search = new models.Search(songs[i].songTitle);
+			var search = new models.Search(songList[i].songTitle);
 			search.localResults = models.LOCALSEARCHRESULTS.APPEND;
 			search.observe(models.EVENT.CHANGE, function() {
 				var firstResult = search.tracks[0];
 				if (firstResult) {
-					songs[i].uri = firstResult.data.uri;
+					songList[i].uri = firstResult.data.uri;
 					playlistModel.add(firstResult);
 				} else {
-					console.log('ERROR: no song found for ' + songs[i].songTitle, songs[i], search);
+					console.log('ERROR: no song found for ' + songList[i].songTitle, songList[i], search);
 				}
-				getSpotifySongs(i + 1, songs);
+				getSpotifySongs(i + 1, songList);
 			});
 			search.appendNext();
 		} else {
@@ -298,13 +352,14 @@ jQuery(function($) {
 	}
 
 	function findBy(list, field, value) {
-		var items = [];
+		var item = null;
 		$.each(list, function(idx, song) {
 			if (song[field] && song[field] === value) {
-				items.push(song);
+				item = song;
+				return false;
 			}
 		});
-		return items.length ? items : null;
+		return item;
 	}
 
 	function sortBy(list, field) {

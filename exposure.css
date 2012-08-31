@@ -111,6 +111,44 @@ h1 {
 	background-color: grey;
 }
 
+#trackInfo {
+	overflow-x: scroll;
+	max-height: 320px;
+	white-space: nowrap;
+}
+
+#trackInfo > div {
+	height: 300px;
+	width: 300px;
+	display: inline-block;
+}
+
+#trackInfo .albumWrapper {
+	position: relative;
+}
+
+#trackInfo .albumArt {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+#trackInfo .profilePicWrapper {
+	height: 100px;
+	width: 100px;
+	overflow: hidden;
+	position: absolute;
+	top: 190px;
+	left: 0px;
+	border: 5px solid grey;
+	border-radius: 5px;
+}
+
+#trackInfo .albumFriendPic {
+	min-height: 100px;
+	min-width: 100px;
+}
+
 div.sp-list {
 	max-height: none;
 }
