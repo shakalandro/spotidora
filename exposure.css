@@ -18,6 +18,7 @@ h1 {
 	color: #FFCC11;
 	font-family: 'Ranger';
 	text-shadow: 1px 2px 5px #000000;
+	margin-top: 10px;
 }
 
 #x {
@@ -129,11 +130,6 @@ header{
 	margin-right: 10px;
 }
 
-#songsPerFriend, #totalSongs {
-	float: right;
-	color: white;
-	margin: 10px;
-}
 
 #trackInfo {
 	overflow-x: scroll;
@@ -183,6 +179,8 @@ div.sp-list {
 	display: none;
 }
 
+/*=======footer code begins========*/
+
 footer {
 	position: fixed;
 	height: 50px;
@@ -191,6 +189,36 @@ footer {
 	bottom: 0px;
 	-webkit-box-shadow: inset 0px 10px 20px #000;
 }
+
+#refresh {
+	float: left;
+	margin: 10px;
+	height: 30px;
+}
+
+#refresh:hover {
+	cursor:pointer;
+}
+
+#songsPerFriend, #totalSongs {
+	float: right;
+	color: white;
+	margin: 10px;
+	font-size: 8pt;
+	color: #CCCCCC;
+}
+
+#songsPerFriend input, #totalSongs input {
+	background-color: #373737;
+	border-bottom: 1px solid #666666;
+	border-top: 1px solid #000000;
+	vertical-align: -4px;
+	/*box-shadow: inset 0px 1px 2px #000000;*/
+}
+
+
+
+/*=======footer code ends========*/
 
 header.startHeader {
 	height: 95%;
@@ -202,14 +230,6 @@ header.startHeader h1 {margin-top: 50px;}
 header.startHeader #goButton {margin-top: 20px;}
 header.startHeader #trackInfo {display: none;}
 
-#refresh {
-	float: left;
-	margin: 10px;
-	height: 30px;
-}
-#refresh:hover {
-	cursor:pointer;
-}
 
 #playlist.sp-list.sp-headers {
 	height: 20;
