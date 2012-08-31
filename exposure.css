@@ -99,8 +99,8 @@ header{
 }
 
 #playlist {
-	height: 100%;
 	position: relative;
+	padding-bottom: 50px;
 }
 
 #sp-headers {
