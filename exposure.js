@@ -18,6 +18,8 @@ jQuery(function($) {
 	var totalNumSongs = DEBUG ? 10 : 50;
 	// The number of songs to parse from a given FB friend
 	var songsPerFriend = 4;
+	// Whether to only gather posts that are less than 48 hours old
+	var freshOnly = false;
 
 	// Spotify API objects
 	var sp = getSpotifyApi(1);
@@ -34,8 +36,7 @@ jQuery(function($) {
 	var playlistModel;
 
 	// exposure specific metadata about songs in playlist
-	var songList = [];
-	var sortStyle;
+	var songList;
 
 	// temp data for remembering which songs have been heard and which posts have been seen
 	var seen;
@@ -43,13 +44,67 @@ jQuery(function($) {
 
 	$('#throbber').hide();
 	$('#trackInfo').hide();
+	$('#refresh').addClass('disabled');
 
 	if (DEBUG) {
 		localStorage.clear();
 	}
 
 	// Initialize the playlist when the go or refresh buttons are clicked
-	$('#goButton, #refresh').click(function() {
+	$('#goButton, #refresh:not(".disabled")').live('click', start);
+
+	// Add album widget when a new song is started
+	player.observe(models.EVENT.CHANGE, function(e) {
+		if (e.data.playstate && e.data.curtrack) {
+			console.log('Player Event:', e, player);
+			$('#trackInfo').show();
+			if (player.track != null) {
+				var exposureData = findBy(songList, 'uri', player.track.data.uri);
+				console.log(player.track, exposureData);
+
+				var overallWrapper = $('<div>').hide();
+
+				var positioningWrapper = $('<div>')
+					.addClass('albumWrapper')
+					.append($('<img>', {
+						'class': 'albumArt',
+						'src': player.track.data.album.cover,
+						'alt': 'album art'
+					}))
+					.hover(function() {
+						$(this).find('.contentWrapper').toggleClass('invisible');
+					}, function() {
+						$(this).find('.contentWrapper').toggleClass('invisible');
+					})
+					.appendTo(overallWrapper);
+
+				var profilePicDiv = $('<div>')
+					.addClass('profilePicWrapper')
+					.append(
+						$('<img>', {
+							'src': exposureData.friendPic + '?type=normal',
+							'class': 'albumFriendPic',
+							'alt': 'fb profile pic'
+						})
+					);
+
+				var contentWrapper = $('<div>')
+						.addClass('contentWrapper')
+						.toggleClass('invisible', 3000)
+						.append(profilePicDiv)
+						.append($('<h3>').text(exposureData.friendName))
+						.append($('<h2>').text(player.track.data.name))
+						.append($('<h3>').text(player.track.data.artists[0].name))
+						.appendTo(positioningWrapper);
+
+				$('#trackInfo').prepend(overallWrapper);
+				overallWrapper.fadeIn('slow');
+			}
+		}
+	});
+
+	// create a new playlist and start the whole process
+	function start() {
 		playlistModel = new models.Playlist();
 		var playlistView = new views.List(playlistModel, function(track) {
 			var exposureData = findBy(songList, 'uri', track.data.uri);
@@ -57,8 +112,8 @@ jQuery(function($) {
 					views.Track.FIELD.STAR |
 					views.Track.FIELD.SHARE |
 					views.Track.FIELD.NAME |
-       				views.Track.FIELD.ARTIST |
-       				views.Track.FIELD.DURATION);
+	   				views.Track.FIELD.ARTIST |
+	   				views.Track.FIELD.DURATION);
 
 			//inject heard time column
 			var heardTime = document.createTextNode(getTimeString((new Date()).diff(exposureData.ts)));
@@ -118,68 +173,22 @@ jQuery(function($) {
 			.append(headersList)
 			.append(playlistView.node);
 
+		songList = [];
 		seen = localStorageGetJSON('seen');
 		heard = localStorageGetJSON('heard');
 		songsPerFriend = parseInt($('#songsPerFriend input').val());
-		totalNumSongs = parseInt($('#totalSongs input').val());
-		console.log(songsPerFriend, totalNumSongs);
-        $('#instructions').hide();
-        $('#throbber').show();
-        $('header').removeClass('startHeader');
-        $('#throbber span').text('Authenticating');
-        $(this).addClass('small');
+		totalNumSongs = parseInt($('#totalNumSongs input').val());
+		freshOnly = $('#freshOnly input').is(':checked');
+		console.log(songsPerFriend, totalNumSongs, freshOnly);
+	    $('#instructions').hide();
+	    $('#throbber').show();
+	    $('header').removeClass('startHeader');
+	    $('#throbber span').text('Authenticating');
+	    $('#goButton').addClass('small');
+	    hideControls();
+
 		authenticate();
-	});
-
-	// Add album widget when a new song is started
-	player.observe(models.EVENT.CHANGE, function(e) {
-		if (e.data.playstate && e.data.curtrack) {
-			console.log('Player Event:', e, player);
-			$('#trackInfo').show();
-			if (player.track != null) {
-				var exposureData = findBy(songList, 'uri', player.track.data.uri);
-				console.log(player.track, exposureData);
-
-				var overallWrapper = $('<div>').hide();
-
-				var positioningWrapper = $('<div>')
-					.addClass('albumWrapper')
-					.append($('<img>', {
-						'class': 'albumArt',
-						'src': player.track.data.album.cover,
-						'alt': 'album art'
-					}))
-					.hover(function() {
-						$(this).find('.contentWrapper').toggleClass('invisible');
-					}, function() {
-						$(this).find('.contentWrapper').toggleClass('invisible');
-					})
-					.appendTo(overallWrapper);
-
-				var profilePicDiv = $('<div>')
-					.addClass('profilePicWrapper')
-					.append(
-						$('<img>', {
-							'src': exposureData.friendPic + '?type=normal',
-							'class': 'albumFriendPic',
-							'alt': 'fb profile pic'
-						})
-					);
-
-				var contentWrapper = $('<div>')
-						.addClass('contentWrapper')
-						.toggleClass('invisible', 3000)
-						.append(profilePicDiv)
-						.append($('<h3>').text(exposureData.friendName))
-						.append($('<h2>').text(player.track.data.name))
-						.append($('<h3>').text(player.track.data.artists[0].name))
-						.appendTo(positioningWrapper);
-
-				$('#trackInfo').prepend(overallWrapper);
-				overallWrapper.fadeIn('slow');
-			}
-		}
-	});
+	}
 
 	// Login with facebook if we need to
 	function authenticate() {
@@ -269,7 +278,8 @@ jQuery(function($) {
 				friendID: songPost.from.id,
 				friendPic: 'https://graph.facebook.com/' + songPost.from.id + '/picture',
 				songID: songPost.data.song.id,
-				songTitle: songPost.data.song.title
+				songTitle: songPost.data.song.title,
+				postID: songPost.data.id
 			};
 		} catch(e) {
 			console.log('Problem parsing song post', e, songPost, songList);
@@ -286,7 +296,14 @@ jQuery(function($) {
 	// returns false if the given song should be added from the list
 	// returns true if the given song should be filtered from the list
 	function filterSong(songData) {
-		if (!seen[songData.songID]) {
+		if (freshOnly) {
+			var now = new Date();
+			if (now - songData.ts > 1000 * 60 * 60 * 48) {
+				console.log('Filtered stale song post', songData, now - songData.ts);
+				return true;
+			}
+		}
+		if (!seen[songData.postID]) {
 			if (!heard[songData.songID]) {
 				heard[songData.songID] = [songData.friendID];
 				return false;
@@ -294,7 +311,7 @@ jQuery(function($) {
 				console.log('Filtered duplicate song:', songData, heard);
 				heard[songData.songID].push(songData.friendID);
 			}
-			seen.push(songData.songID);
+			seen.push(songData.postID);
 		} else {
 			console.log('Filtered duplicate facebook post:', songData, seen);
 		}
@@ -344,6 +361,7 @@ jQuery(function($) {
 		} else {
 			$('#throbber').hide();
 			$('#throbber span').empty();
+			showControls();
 			localStorageSetJSON('heard', heard);
 			localStorageSetJSON('seen', seen);
 		}
@@ -375,6 +393,16 @@ jQuery(function($) {
 
 	function localStorageSetJSON(key, value) {
 		localStorage[key] = JSON.stringify(value);
+	}
+
+	function hideControls() {
+		$('#refresh').addClass('disabled');
+		$('.appOption input').attr('disabled', true);
+	}
+
+	function showControls() {
+		$('#refresh').removeClass('disabled');
+		$('.appOption input').attr('disabled', false);
 	}
 
 	Array.prototype.shuffle = function() {
