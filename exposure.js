@@ -205,9 +205,11 @@ jQuery(function($) {
 	function updateOptionFeedback() {
 		var value = $(this).val();
 		if (value.length < 2) {
-			value = ' ' + value;
+			value = '&nbsp;&nbsp;' + value;
+		} else if (value.length < 3) {
+			value = '&nbsp;' + value;
 		}
-		$(this).parent().find('.feedback').text($(this).val());
+		$(this).parent().find('.feedback').html(value);
 	}
 
 	// Login with facebook if we need to

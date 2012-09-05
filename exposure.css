@@ -205,10 +205,14 @@ footer {
 
 .appOption input {
 	background-color: #373737;
-	border-bottom: 1px solid #666666;
-	border-top: 1px solid #000000;
+	border-radius: 15px;
+	border: 1px solid #666666;
 	vertical-align: -4px;
 	/*box-shadow: inset 0px 1px 2px #000000;*/
+}
+
+.appOption .feedback {
+	font-family: monospace;
 }
 
 
