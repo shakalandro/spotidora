@@ -12,31 +12,40 @@
 	<body>
 		<header class="startHeader">
 			<h1>E<span id="x">x</span>posure</h1>
-			<div id="throbber">
-				<img src="throbber.gif" alt="throbber" />
-				<span></span>
-			</div>
 			<div id="trackInfo"></div>
 			<div id="goButton" class="clickable">
 			<img src="clickToStart.png" /></div>
 			<p id="instructions">Find out what your friends are listening to.</p>
 			<div id="intro">
 				<p class="introP"><span class="littleHeader">Connect with facebook</span> to dynamically generate a playlist of all of what your friends are listening to on Spotify.</p>
-				<p class="introP"><span class="littleHeader">Adjust your settings</span> with the sliders below to set the variation of friends and songs that you'll hear. Selecting <em>fresh</em> only finds music your friends listened to in the last two days.</p>
+				<p class="introP"><span class="littleHeader">Adjust your settings</span> with the sliders below to set the variation of friends and songs that you'll hear. The <em>freshness</em> determines how recently your friends heard what you are hearing.</p>
 			</div>
 		</header>
 		<div class="spacer"></div>
 		<div id="playlist"></div>
 		<footer>
 			<img src="refresh.png" id="refresh" />
-			<div id="freshOnly" class="appOption">
-				<label>Fresh Songs Only: <input type="checkbox" /></label>
+			<span id="throbber">
+				<img src="throbber.gif" alt="throbber" />
+				<span></span>
+			</span>
+			<div id="freshness" class="appOption">
+				<label>Freshness:
+					<input type="range" min="1" max="100" value="14" /> <span class="feedback"></span>
+					<!-- <span class="bubbletip">How recently your friend listened to the song in days</span>-->
+				</label>
 			</div>
 			<div id="totalNumSongs" class="appOption">
-				<label>Total Songs: <input type="range" min="1" max="100" value="25" /></label>
+				<label>Total Songs:
+					<input type="range" min="1" max="100" value="25" /> <span class="feedback"></span>
+					<!--<span class="bubbletip">How long you want your playlist to be</span>-->
+				</label>
 			</div>
 			<div id="songsPerFriend" class="appOption">
-				<label>Songs Per Friend: <input type="range" min="1" max="20" value="4" /></label>
+				<label>Songs Per Friend:
+					<input type="range" min="1" max="20" value="4" /> <span class="feedback"></span>
+					<!--<span class="bubbletip">How many songs to gather from each friend</span>-->
+				</label>
 			</div>
 		</footer>
 	</body>

@@ -19,7 +19,7 @@ jQuery(function($) {
 	// The number of songs to parse from a given FB friend
 	var songsPerFriend = 4;
 	// Whether to only gather posts that are less than 48 hours old
-	var freshOnly = false;
+	var freshness = false;
 
 	// Spotify API objects
 	var sp = getSpotifyApi(1);
@@ -53,6 +53,10 @@ jQuery(function($) {
 	// Initialize the playlist when the go or refresh buttons are clicked
 	$('#goButton, #refresh:not(".disabled")').live('click', start);
 
+	$('.appOption input')
+		.change(updateOptionFeedback)
+		.change();
+
 	// Add album widget when a new song is started
 	player.observe(models.EVENT.CHANGE, function(e) {
 		if (e.data.playstate && e.data.curtrack) {
@@ -72,9 +76,9 @@ jQuery(function($) {
 						'alt': 'album art'
 					}))
 					.hover(function() {
-						$(this).find('.contentWrapper').toggleClass('invisible');
+						$(this).find('.contentWrapper:not(.justadded)').removeClass('invisible');
 					}, function() {
-						$(this).find('.contentWrapper').toggleClass('invisible');
+						$(this).find('.contentWrapper:not(.justadded)').addClass('invisible');
 					})
 					.appendTo(overallWrapper);
 
@@ -89,8 +93,8 @@ jQuery(function($) {
 					);
 
 				var contentWrapper = $('<div>')
-						.addClass('contentWrapper')
-						.toggleClass('invisible', 3000)
+						.addClass('contentWrapper justadded')
+						.toggleClass('invisible justadded', 3000)
 						.append(profilePicDiv)
 						.append($('<h3>').text(exposureData.friendName))
 						.append($('<h2>').text(player.track.data.name))
@@ -99,6 +103,12 @@ jQuery(function($) {
 
 				$('#trackInfo').prepend(overallWrapper);
 				overallWrapper.fadeIn('slow');
+
+				if ($('#trackInfo').children().size() > 3) {
+					$('#trackInfo').css('overflow-x', 'scroll');
+				} else {
+					$('#trackInfo').css('overflow-x', 'hidden');
+				}
 			}
 		}
 	});
@@ -178,8 +188,8 @@ jQuery(function($) {
 		heard = localStorageGetJSON('heard');
 		songsPerFriend = parseInt($('#songsPerFriend input').val());
 		totalNumSongs = parseInt($('#totalNumSongs input').val());
-		freshOnly = $('#freshOnly input').is(':checked');
-		console.log(songsPerFriend, totalNumSongs, freshOnly);
+		freshness = parseInt($('#freshness input').val());
+		console.log(songsPerFriend, totalNumSongs, freshness);
 	    $('#goButton').hide();
 	    $('#instructions').hide();
 	    $('#intro').hide();
@@ -190,6 +200,14 @@ jQuery(function($) {
 	    hideControls();
 
 		authenticate();
+	}
+
+	function updateOptionFeedback() {
+		var value = $(this).val();
+		if (value.length < 2) {
+			value = ' ' + value;
+		}
+		$(this).parent().find('.feedback').text($(this).val());
 	}
 
 	// Login with facebook if we need to
@@ -262,7 +280,7 @@ jQuery(function($) {
 						getPostsFromFriend(friends, i + 1, songsFound);
 					}, SONG_RATE);
 				}, function() {
-					console.log("Could not get songs by friend failure");
+					console.log("Could not get songs by friend", friends[i]);
 				}
 			);
 		} else {
@@ -298,12 +316,10 @@ jQuery(function($) {
 	// returns false if the given song should be added from the list
 	// returns true if the given song should be filtered from the list
 	function filterSong(songData) {
-		if (freshOnly) {
-			var now = new Date();
-			if (now - songData.ts > 1000 * 60 * 60 * 48) {
-				console.log('Filtered stale song post', songData, now - songData.ts);
-				return true;
-			}
+		var now = new Date();
+		if (now - songData.ts > 1000 * 60 * 60 * 24 * freshness) {
+			console.log('Filtered stale song post', songData, now - songData.ts);
+			return true;
 		}
 		if (!seen[songData.postID]) {
 			if (!heard[songData.songID]) {
@@ -335,7 +351,6 @@ jQuery(function($) {
 	}
 
 	function displaySongs() {
-		console.log('songList:', songList);
 		songList.shuffle();
 		getSpotifySongs(0);
 	}
@@ -355,7 +370,7 @@ jQuery(function($) {
 					songList[i].uri = firstResult.data.uri;
 					playlistModel.add(firstResult);
 				} else {
-					console.log('ERROR: no song found for ' + songList[i].songTitle, songList[i], search);
+					console.log('ERROR: no song in spotify found for ' + songList[i].songTitle, songList[i], search);
 				}
 				getSpotifySongs(i + 1, songList);
 			});
@@ -435,7 +450,6 @@ jQuery(function($) {
 	}
 
 	function sortBy(list, field) {
-		console.log(list);
 		list.sort(function(s1, s2) {
 			return s1[field] < s2[field];
 		});

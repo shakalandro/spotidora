@@ -68,8 +68,8 @@ header{
 
 #throbber {
 	position: absolute;
-	top: 15px;
-	left: 60px;
+	top: 10px;
+	left: 50px;
 	color: white;
 }
 
@@ -200,6 +200,7 @@ footer {
 	margin: 10px;
 	font-size: 8pt;
 	color: #CCCCCC;
+	margin-top: 15px;
 }
 
 .appOption input {
@@ -208,10 +209,6 @@ footer {
 	border-top: 1px solid #000000;
 	vertical-align: -4px;
 	/*box-shadow: inset 0px 1px 2px #000000;*/
-}
-
-#freshOnly input {
-	-webkit-appearance: checkbox;
 }
 
 
@@ -229,10 +226,6 @@ header.startHeader #trackInfo {display: none;}
 
 #playlist.sp-list.sp-headers {
 	height: 20;
-}
-
-#trackInfo {
-	overflow-x: scroll;
 }
 
 .contentWrapper {
