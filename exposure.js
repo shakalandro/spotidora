@@ -180,7 +180,9 @@ jQuery(function($) {
 		totalNumSongs = parseInt($('#totalNumSongs input').val());
 		freshOnly = $('#freshOnly input').is(':checked');
 		console.log(songsPerFriend, totalNumSongs, freshOnly);
+	    $('#goButton').hide();
 	    $('#instructions').hide();
+	    $('#intro').hide();
 	    $('#throbber').show();
 	    $('header').removeClass('startHeader');
 	    $('#throbber span').text('Authenticating');
