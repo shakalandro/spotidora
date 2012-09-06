@@ -68,8 +68,8 @@ header{
 
 #throbber {
 	position: absolute;
-	top: 15px;
-	left: 60px;
+	top: 10px;
+	left: 50px;
 	color: white;
 }
 
@@ -202,18 +202,20 @@ footer {
 	margin: 10px;
 	font-size: 8pt;
 	color: #CCCCCC;
+	margin-top: 15px;
 }
 
 .appOption input {
 	background-color: #373737;
-	border-bottom: 1px solid #666666;
-	border-top: 1px solid #000000;
+	border-radius: 15px;
+	border: 1px solid #666666;
 	vertical-align: -4px;
 	/*box-shadow: inset 0px 1px 2px #000000;*/
 }
 
-#freshOnly input {
-	-webkit-appearance: checkbox;
+.appOption .feedback {
+	font-family: monospace;
+	font-size: 14px;
 }
 
 
@@ -231,10 +233,6 @@ header.startHeader #trackInfo {display: none;}
 
 #playlist.sp-list.sp-headers {
 	height: 20;
-}
-
-#trackInfo {
-	overflow-x: scroll;
 }
 
 .contentWrapper {
