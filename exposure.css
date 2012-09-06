@@ -104,6 +104,8 @@ header{
 	color: black;
 	font-weight: bold;
 	font-size: 13px;
+	color: #171717;
+	text-shadow: 0px 1px 1px #999999;
 }
 
 #sp-headers.sp-list .sp-item span {
