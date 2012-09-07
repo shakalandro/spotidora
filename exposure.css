@@ -1,6 +1,12 @@
 @font-face {
-  font-family: Ranger;
-  src: url("Ranger.ttf") format("truetype");
+	font-family: Ranger;
+	src: url("Ranger.ttf") format("truetype");
+}
+
+@font-face {
+	font-family: Ranger;
+	font-weight: normal;
+	src: url("Ranger.ttf") format("truetype");
 }
 
 body {
