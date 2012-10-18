@@ -27,6 +27,12 @@ h1 {
 	margin-top: 10px;
 }
 
+#headerImage {
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+
 #x {
 	color: #FFFFDD;
 }
